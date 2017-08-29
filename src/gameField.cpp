@@ -202,7 +202,8 @@ void GameField::SpawnFood()
 	m_Food.Spawn(Utilities::Random(0, m_GridDimension - 1),
 		Utilities::Random(0, m_GridDimension - 1));
 
-	while (m_Grid[(m_GridDimension * m_Food.PosX()) + m_Food.PosY()].m_State != CELL_STATE_EMPTY)
+	while (m_Grid[(m_GridDimension * m_Food.PosX()) + m_Food.PosY()].m_State != CELL_STATE_EMPTY
+		|| (m_Food.PosX() == m_Snake.TailPosX() && m_Food.PosY() == m_Snake.TailPosY()))
 	{
 		m_Food.Respawn(Utilities::Random(0, m_GridDimension - 1),
 			Utilities::Random(0, m_GridDimension - 1));
