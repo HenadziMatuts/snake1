@@ -1,16 +1,25 @@
 #pragma once
 #include "uiLayout.h"
+#include "uiWidget.h"
 
-const unsigned int DIE_MESSAGES_TOTAL = 13;
-const unsigned int AFFRONTS = 0;
-const unsigned int NEUTRALS = 5;
-const unsigned int CONGRATZ = 10;
+enum InGameUILabel
+{
+	IN_GAME_UI_LABEL_DIE_MESSAGE = 0,
+	IN_GAME_UI_LABEL_TRY_AGAIN,
+	IN_GAME_UI_LABEL_TOTAL
+};
+
+enum InGameUIButton
+{
+	IN_GAME_UI_BUTTON_YES = 0,
+	IN_GAME_UI_BUTTON_NO,
+	IN_GAME_UI_BUTTON_TOTAL
+};
 
 class InGameLayout : public UILayout {
 public:
 	InGameLayout() :
-		m_SnakeDied(false),
-		m_IsTryAgainSelected(true)
+		m_SnakeDied(false)
 	{};
 
 	UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen);
@@ -24,12 +33,11 @@ public:
 
 private:
 	bool m_SnakeDied;
-	bool m_IsTryAgainSelected;
 
-	/* drawables */
-	SDL_Texture *m_TryAgain;
-	SDL_Texture *m_Yes, *m_No;
-	SDL_Texture *m_DieMessages[DIE_MESSAGES_TOTAL];
+	SDL_Rect m_DialogFrame;
 
-	SDL_Texture *m_CurrentMessage;
+	UILabel m_UILabel[IN_GAME_UI_LABEL_TOTAL];
+	UIButton m_UIButton[IN_GAME_UI_BUTTON_TOTAL];
+
+	InGameUIButton m_SelectedButton;
 };

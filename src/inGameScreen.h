@@ -1,6 +1,7 @@
 #pragma once
 #include "gameScreen.h"
 #include "uiLayout.h"
+#include "uiWidget.h"
 #include "gameField.h"
 #include "snake.h"
 #include <cstdio>
@@ -16,7 +17,7 @@ public:
 		m_TimerStopped(true),
 		m_TimerHandicap(5000)
 	{
-		sprintf_s(m_ScoreText, "score: %04d", m_Score);
+		sprintf_s(m_ScoreText, "score: %03d", m_Score);
 		sprintf_s(m_DiemerText, "diemer: %03d", m_TimeLast / 1000);
 	};
 
@@ -40,6 +41,8 @@ private:
 	int m_TimeLast;
 	char m_DiemerText[12];
 	int m_TimerHandicap;
+
+	UILabel m_ScoreLabel, m_DiemerLabel;
 };
 
 /**

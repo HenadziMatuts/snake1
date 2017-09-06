@@ -1,15 +1,18 @@
 #pragma once
 #include "uiLayout.h"
+#include "uiWidget.h"
 #include <vector>
 
-enum MenuInvites
+enum MenuUILabel
 {
-	MENU_INVITE_START = 0,
-	MENU_INVITE_SETTINGS,
-	MENU_INVITE_EXIT,
-	MENU_INVITE_RESUME,
-	MENU_INVITE_RESTART,
-	MENU_INVITE_CREDITS
+	MENU_UI_TITLE = 0,
+	MENU_UI_INVITE_START,
+	MENU_UI_INVITE_SETTINGS,
+	MENU_UI_INVITE_EXIT,
+	MENU_UI_INVITE_RESUME,
+	MENU_UI_INVITE_RESTART,
+	MENU_UI_INVITE_CREDITS,
+	MENU_UI_TOTAL
 };
 
 enum MenuAction
@@ -41,13 +44,12 @@ public:
 	void SetPauseLayout(bool set);
 
 private:
-	/* graphics */
-	SDL_Texture *m_Title, *m_Invite[6];
+	UILabel m_UILabel[MENU_UI_TOTAL];
 
 	/* active invites */
 	bool m_IsPaused;
-	std::vector<MenuInvites> m_ActiveInvites;
-	int m_CurrentActiveIndex;
+	std::vector<MenuUILabel> m_ActiveInvites;
+	int m_VisibleActiveInviteIndex;
 
 	/* animation timing */
 	uint32_t m_Timer;

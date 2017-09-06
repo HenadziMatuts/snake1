@@ -13,8 +13,8 @@ GameField::~GameField()
 	}
 }
 
-void GameField::Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions,
-					pfnRender render, uint32_t gridDimension, bool stretch, int speed, bool borderless)
+void GameField::Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions, pfnRender render,
+					bool stretch, uint32_t gridDimension, int speed, int startBodySize, bool borderless)
 {
 	m_HandleEvents = handleEvents;
 	m_HandleCollisions = handleCollisions;
@@ -24,16 +24,18 @@ void GameField::Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions han
 		Resize(gridDimension, stretch);
 	}
 	m_GameSpeed = speed;
+	m_StartBodySize = startBodySize;
 	m_IsBorderless = borderless;
 }
 
-void GameField::Reconfigure(uint32_t gridDimension, bool stretch, int speed, bool borderless)
+void GameField::Reconfigure(uint32_t gridDimension, bool stretch, int speed, int startBodySize, bool borderless)
 {
 	if (m_GridDimension != gridDimension)
 	{
 		Resize(gridDimension, stretch);
 	}
 	m_GameSpeed = speed;
+	m_StartBodySize = startBodySize;
 	m_IsBorderless = borderless;
 }
 
@@ -168,7 +170,7 @@ void GameField::SpawnSnake()
 {
 	m_Snake.Spawn(Utilities::Random(5, m_GridDimension - 5),
 		Utilities::Random(5, m_GridDimension - 5), Utilities::Random(-1, 1),
-		Utilities::Random(-1, 1), 10, m_GridDimension, m_GridDimension);
+		Utilities::Random(-1, 1), m_StartBodySize, m_GridDimension, m_GridDimension);
 
 	int headPosX = m_Snake.HeadPosX(), headPosY = m_Snake.HeadPosY();
 	int tailPosX = m_Snake.TailPosX(), tailPosY = m_Snake.TailPosY();

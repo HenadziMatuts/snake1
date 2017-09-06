@@ -41,13 +41,14 @@ public:
 		m_GridDimension(0),
 		m_GameSpeed(30),
 		m_Elapsed(0),
+		m_StartBodySize(10),
 		m_IsBorderless(true)
 	{};
 	~GameField();
 
-	void Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions,
-				pfnRender render, uint32_t gridDimension, bool stretch, int speed, bool borderless);
-	void Reconfigure(uint32_t gridDimension, bool stretch, int speed, bool borderless);
+	void Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions, pfnRender render,
+		bool stretch, uint32_t gridDimension, int speed, int startBodySize, bool borderless);
+	void Reconfigure(uint32_t gridDimension, bool stretch, int speed, int startBodySize, bool borderless);
 	void Resize(uint32_t gridDimension, bool stretch);
 
 	void HandleEvents(SDL_Event *event);
@@ -88,6 +89,8 @@ private:
 	/* game speed */
 	int m_GameSpeed;
 	uint32_t m_Elapsed;
+
+	int m_StartBodySize;
 
 	bool m_IsBorderless;
 

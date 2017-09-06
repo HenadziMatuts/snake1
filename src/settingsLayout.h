@@ -1,12 +1,22 @@
 #pragma once
 #include "uiLayout.h"
+#include "uiWidget.h"
+#include <vector>
 #include <SDL.h>
 
-enum SettingsInteractable
+enum SettingsUILabel
 {
-	SETTINGS_SMOOTH_MOVEMENT = 0,
-	SETTINGS_BACK,
-	SETTINGS_TOTAL
+	SETTINGS_UI_LABEL_TITLE = 0,
+	SETTINGS_UI_LABEL_SMOOTH,
+	SETTINGS_UI_LABEL_DISCRETE,
+	SETTINGS_UI_LABEL_TOTAL
+};
+
+enum SettingsUIButton
+{
+	SETTINGS_UI_BUTTON_BACK = 0,
+	SETTINGS_UI_BUTTON_MOVEMENT,
+	SETTINGS_UI_BUTTON_TOTAL
 };
 
 class SettingsLayout : public UILayout {
@@ -25,10 +35,10 @@ public:
 	void DestroyLayout();
 
 private:
-	SDL_Texture *m_Title, *m_Smooth, *m_Discrete;
-	SDL_Texture *m_Interactables[SETTINGS_TOTAL];
+	UILabel m_UILabel[SETTINGS_UI_LABEL_TOTAL];
+	UIButton m_UIButton[SETTINGS_UI_BUTTON_TOTAL];
 
-	SettingsInteractable m_Selected;
+	SettingsUIButton m_SelectedButton;
 
 	/* settings */
 	bool m_SmoothMovement;

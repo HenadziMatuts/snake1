@@ -13,11 +13,13 @@ namespace Globals
 	/* window properties */
 	extern int SCREEN_WIDTH;
 	extern int SCREEN_HEIGHT;
+	extern float WINDOW_SCALE_FACTOR;
 
 	/* game settings */
+	extern GameMode MODE;
 	extern uint32_t GRID_DIMENSION;
 	extern int GAME_SPEED;
-	extern GameMode MODE;
+	extern int BODY_SIZE;
 	extern bool BORDERLESS;
 	
 	/*settings*/

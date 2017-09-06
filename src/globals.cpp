@@ -3,10 +3,12 @@
 
 int Globals::SCREEN_WIDTH = 800;
 int Globals::SCREEN_HEIGHT = 600;
+float Globals::WINDOW_SCALE_FACTOR = (float)Globals::SCREEN_HEIGHT / 600;
 
+GameMode Globals::MODE = GAME_MODE_TRAINING;
 uint32_t Globals::GRID_DIMENSION = 40;
 int Globals::GAME_SPEED = 10;
-GameMode Globals::MODE = GAME_MODE_TRAINING;
+int Globals::BODY_SIZE = 10;
 bool Globals::BORDERLESS = true;
 
 bool Globals::SMOOTH_MOVEMENT = true;

@@ -22,6 +22,8 @@ public:
 	 */
 	int Run();
 
+	SDL_Renderer* GetRenderer();
+
 private:
 	Game() :
 		m_Window(nullptr),

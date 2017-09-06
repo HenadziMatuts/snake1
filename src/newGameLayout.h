@@ -1,27 +1,37 @@
 #pragma once
 #include "uiLayout.h"
+#include "uiWidget.h"
+#include <vector>
 
-enum NewGameSettingsInteractable
+enum NewGameUILabel
 {
-	NEW_GAME_MODE = 0,
-	NEW_GAME_FIELD_SIZE,
-	NEW_GAME_SPEED,
-	NEW_GAME_IS_BORDERLESS,
-	NEW_GAME_START,
-	NEW_GAME_BACK,
-	NEW_GAME_SETTINGS_TOTAL
+	NEW_GAME_UI_LABEL_TITLE = 0,
+
+	NEW_GAME_UI_LABEL_TRAINING,
+	NEW_GAME_UI_LABEL_SURVIVAL,
+	
+	NEW_GAME_UI_LABEL_FIELD_SIZE,
+	NEW_GAME_UI_LABEL_SPEED,
+	NEW_GAME_UI_LABEL_BODY_SIZE,
+	
+	NEW_GAME_UI_LABEL_BORDERLESS,
+	NEW_GAME_UI_LABEL_NOT_BORDERLESS,
+
+	NEW_GAME_UI_LABEL_TOTAL
 };
 
-enum NewGameSettingsTip
+enum NewGameUIButton
 {
-	NEW_GAME_TIPS_MODE = 0,
-	NEW_GAME_TIPS_MODE_TRAINING,
-	NEW_GAME_TIPS_MODE_SURVIVAL,
-	NEW_GAME_TIPS_FIELD_SIZE,
-	NEW_GAME_TIPS_SPEED,
-	NEW_GAME_TIPS_START,
-	NEW_GAME_TIPS_BACK,
-	NEW_GAME_TIPS_TOTAL,
+	NEW_GAME_UI_BUTTON_MODE,
+	NEW_GAME_UI_BUTTON_FIELD_SIZE,
+	NEW_GAME_UI_BUTTON_SPEED,
+	NEW_GAME_UI_BUTTON_BODY_SIZE,
+	NEW_GAME_UI_BUTTON_IS_BORDERLESS,
+
+	NEW_GAME_UI_BUTTON_START,
+	NEW_GAME_UI_BUTTON_BACK,
+
+	NEW_GAME_UI_BUTTON_TOTAL
 };
 
 struct NewGameSettings
@@ -30,12 +40,14 @@ struct NewGameSettings
 		m_Mode(GAME_MODE_TRAINING),
 		m_GridDimension(55),
 		m_GameSpeed(20),
+		m_BodySize(10),
 		m_IsBorderless(true)
 	{};
 
 	GameMode m_Mode;
 	uint32_t m_GridDimension;
 	int m_GameSpeed;
+	int m_BodySize;
 	bool m_IsBorderless;
 };
 
@@ -51,14 +63,10 @@ public:
 	void DestroyLayout();
 
 private:
-	SDL_Texture *m_Title, *m_Yes, *m_No;
-	SDL_Texture *m_Interactables[NEW_GAME_SETTINGS_TOTAL];
-	SDL_Texture *m_GameModes[GAME_MODE_TOTAL];
-	SDL_Texture *m_Tips[NEW_GAME_TIPS_TOTAL];
+	UILabel m_UILabel[NEW_GAME_UI_LABEL_TOTAL];
+	UIButton m_UIButton[NEW_GAME_UI_BUTTON_TOTAL];
 
-	NewGameSettingsInteractable m_Selected;
-	NewGameSettingsTip m_Tip;
-	bool m_ShowConcreteModeTip;
+	NewGameUIButton m_SelectedButton;
 
 	NewGameSettings m_Settings;
 };

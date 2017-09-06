@@ -6,7 +6,7 @@ void Scoreboard::Reset()
 {
 	m_GameMode = Globals::MODE;
 	m_Score = 0;
-	sprintf_s(m_ScoreText, "score: %04d", m_Score);
+	sprintf_s(m_ScoreText, "score: %03d", m_Score);
 	
 	m_TimeLast = 0;
 	sprintf_s(m_DiemerText, "diemer: %03d", m_TimeLast / 1000);
@@ -27,7 +27,7 @@ void Scoreboard::Increment()
 	}
 
 	++m_Score;
-	sprintf_s(m_ScoreText, "score: %04d", m_Score);
+	sprintf_s(m_ScoreText, "score: %03d", m_Score);
 }
 
 unsigned int Scoreboard::Score()
@@ -41,33 +41,27 @@ void Scoreboard::Stop()
 }
 
 void Scoreboard::Render(SDL_Renderer *renderer, SDL_Rect *viewport)
-{
-	SDL_Rect r;
-	SDL_RenderSetViewport(renderer, viewport);
+{	
+	TTF_Font *font = Game::Instance().Resources().GetFont();
 
-	SDL_Texture *scoreTexture = Utilities::CreateTextureFromString(renderer,
-		Game::Instance().Resources().GetFont(), m_ScoreText);
-	if (scoreTexture)
-	{	
-		r = { 0, 0, viewport->w, viewport->h / 15 };
-		SDL_RenderCopy(renderer, scoreTexture, NULL, &r);
-		SDL_DestroyTexture(scoreTexture);
+	if (m_ScoreLabel.Create(m_ScoreText, font, renderer,
+		(float)(viewport->x + viewport->w) / Globals::SCREEN_WIDTH,
+		(float)(viewport->y) / Globals::SCREEN_HEIGHT,
+		true, 0.4f, TEXT_ANCROR_TOP_RIGHT))
+	{
+		m_ScoreLabel.Render(renderer);
 	}
 
 	if (m_GameMode == GAME_MODE_SURVIVAL)
 	{
-		SDL_Texture *diemerTexture = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), m_DiemerText);
-		if (diemerTexture)
+		if (m_DiemerLabel.Create(m_DiemerText, font, renderer,
+			(float)(viewport->x + viewport->w) / Globals::SCREEN_WIDTH,
+			(float)(viewport->y * 4) / Globals::SCREEN_HEIGHT,
+			true, 0.4f, TEXT_ANCROR_TOP_RIGHT))
 		{
-			r = { 0, (viewport->h * 2) / 15, viewport->w, viewport->h / 15 };
-			SDL_RenderCopy(renderer, diemerTexture, NULL, &r);
-			SDL_DestroyTexture(diemerTexture);
+			m_DiemerLabel.Render(renderer);
 		}
 	}
-
-	r = { 0, 0, Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT };
-	SDL_RenderSetViewport(renderer, &r);
 }
 
 InGameEvent Scoreboard::Update(uint32_t elapsed)
@@ -95,8 +89,8 @@ InGameScreen::InGameScreen()
 {
 	m_CurrentLayout = &Globals::inGameLayout;
 	m_Field.Initilaize(HandleEventsInGame, HandleCollisionsInGame,
-				RenderInGame, Globals::GRID_DIMENSION, false,
-				Globals::GAME_SPEED, Globals::BORDERLESS);
+				RenderInGame, false, Globals::GRID_DIMENSION,
+				Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS);
 }
 
 void InGameScreen::Enter(GameEvent event)
@@ -172,7 +166,8 @@ void InGameScreen::Render(SDL_Renderer *renderer)
 
 void InGameScreen::Restart()
 {
-	m_Field.Reconfigure(Globals::GRID_DIMENSION, false, Globals::GAME_SPEED, Globals::BORDERLESS);
+	m_Field.Reconfigure(Globals::GRID_DIMENSION, false,
+		Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS);
 	m_Scoreboard.Reset();
 	m_Field.Reset();
 }

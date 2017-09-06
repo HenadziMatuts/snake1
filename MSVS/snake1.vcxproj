@@ -32,6 +32,7 @@
     <ClCompile Include="..\src\resourceManager.cpp" />
     <ClCompile Include="..\src\settingsLayout.cpp" />
     <ClCompile Include="..\src\snake.cpp" />
+    <ClCompile Include="..\src\uiWidget.cpp" />
     <ClCompile Include="..\src\utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +46,7 @@
     <ClInclude Include="..\src\menuLayout.h" />
     <ClInclude Include="..\src\newGameLayout.h" />
     <ClInclude Include="..\src\settingsLayout.h" />
+    <ClInclude Include="..\src\uiWidget.h" />
     <ClInclude Include="..\src\uiLayout.h" />
     <ClInclude Include="..\src\menuScreen.h" />
     <ClInclude Include="..\src\resourceManager.h" />

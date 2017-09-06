@@ -15,9 +15,19 @@ public:
 	void UnloadResources();
 
 	/**
-	 * Returns loaded font.
-	 */
+	* Returns font.
+	*/
 	TTF_Font* GetFont();
+
+	/**
+	 * Returns font.
+	 */
+	TTF_Font* GetFont(int ptsize);
+
+	/**
+	 *
+	 */
+	void DestroyFont(TTF_Font *font);
 
 private:
 	TTF_Font *m_Font;

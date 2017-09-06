@@ -143,6 +143,11 @@ int Game::Run()
 	return Quit();
 }
 
+SDL_Renderer* Game::GetRenderer()
+{
+	return m_Renderer;
+}
+
 void Game::Render(GameScreen *screen)
 {
 	SDL_SetRenderDrawColor(m_Renderer, 0xE0, 0xE0, 0xE0, 0xFF);

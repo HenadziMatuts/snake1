@@ -3,6 +3,46 @@
 #include "utilities.h"
 #include "globals.h"
 
+static UILayout* SettingMovementButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
+{
+	bool *smoothMovement = (bool*)userData;
+
+	if (event->type == SDL_KEYUP)
+	{
+		switch (event->key.keysym.sym)
+		{
+			case SDLK_RETURN:
+			case SDLK_SPACE:
+			case SDLK_LEFT:
+			case SDLK_RIGHT:
+				*smoothMovement = !(*smoothMovement);
+				break;
+		}
+	}
+
+	return nullptr;
+}
+
+static UILayout* SettingBackButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
+{
+	bool smoothMovement = *(bool*)userData;
+	UILayout *newLayout = nullptr;
+
+	if (event->type == SDL_KEYUP)
+	{
+		switch (event->key.keysym.sym)
+		{
+			case SDLK_RETURN:
+			case SDLK_SPACE:
+				Globals::SMOOTH_MOVEMENT = smoothMovement;
+				newLayout = &Globals::menuLayout;
+				break;
+		}
+	}
+
+	return newLayout;
+}
+
 void SettingsLayout::Enter()
 {
 	m_SmoothMovement = Globals::SMOOTH_MOVEMENT;
@@ -11,143 +51,80 @@ void SettingsLayout::Enter()
 UILayout* SettingsLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
 {
 	UILayout *newLayout = nullptr;
-	
 	if (event->type == SDL_KEYUP)
 	{
 		switch (event->key.keysym.sym)
 		{
 			case SDLK_UP:
 			case SDLK_DOWN:
-				m_Selected = (SettingsInteractable)Utilities::ModuloSum(m_Selected,
-					event->key.keysym.sym == SDLK_UP ? -1 : 1, SETTINGS_TOTAL);
-				break;
+				m_UIButton[m_SelectedButton].Select(false);
 
-			case SDLK_LEFT:
-			case SDLK_RIGHT:
-				switch (m_Selected)
-				{
-					case SETTINGS_SMOOTH_MOVEMENT:
-						m_SmoothMovement = !m_SmoothMovement;
-						break;
+				m_SelectedButton = (SettingsUIButton)Utilities::ModuloSum(m_SelectedButton,
+					event->key.keysym.sym == SDLK_UP ? -1 : 1, SETTINGS_UI_BUTTON_TOTAL);
 
-					default:
-						break;
-				}
-				break;
-
-			case SDLK_RETURN:
-			case SDLK_SPACE:
-				switch (m_Selected)
-				{
-					case SETTINGS_SMOOTH_MOVEMENT:
-						m_SmoothMovement = !m_SmoothMovement;
-						break;
-
-					case SETTINGS_BACK:
-						Globals::SMOOTH_MOVEMENT = m_SmoothMovement;
-						newLayout = &Globals::menuLayout;
-						break;
-				}
+				m_UIButton[m_SelectedButton].Select(true);
 				break;
 
 			case SDLK_ESCAPE:
+				Globals::SMOOTH_MOVEMENT = m_SmoothMovement;
 				newLayout = &Globals::menuLayout;
 				break;
 
 			default:
+				newLayout = m_UIButton[m_SelectedButton].HandleEvents(event, newScreen, (void*)&m_SmoothMovement);
 				break;
 		}
 	}
+
 	return newLayout;
 }
 
 GameEvent SettingsLayout::Update(uint32_t elapsed)
 {
+	m_UILabel[SETTINGS_UI_LABEL_SMOOTH].SetVisibility(m_SmoothMovement);
+	m_UILabel[SETTINGS_UI_LABEL_DISCRETE].SetVisibility(!m_SmoothMovement);
+	
 	return GAME_EVENT_NOTHING_HAPPENS;
 }
 
 void SettingsLayout::Render(SDL_Renderer *renderer)
 {
-	SDL_Rect r;
-
-	r = { (Globals::SCREEN_WIDTH * 11) / 32, Globals::SCREEN_HEIGHT / 16,
-		(Globals::SCREEN_WIDTH * 5) / 16, Globals::SCREEN_HEIGHT / 8 };
-	SDL_RenderCopy(renderer, m_Title, nullptr, &r);
-
-	/* buttons */
-	r = { (Globals::SCREEN_WIDTH * 15) / 64, Globals::SCREEN_HEIGHT / 4,
-		Globals::SCREEN_WIDTH / 4, Globals::SCREEN_HEIGHT / 12 };
-	for (int i = 0; i < SETTINGS_TOTAL; i++, r.y += Globals::SCREEN_HEIGHT / 8)
+	for (int i = 0; i < SETTINGS_UI_LABEL_TOTAL; i++)
 	{
-		if (i == SETTINGS_BACK)
-		{
-			r.y = (Globals::SCREEN_HEIGHT * 3) / 4;
-		}
-
-		if (m_Selected == i)
-		{
-			SDL_Rect _r = r;
-			switch (m_Selected)
-			{
-				case SETTINGS_SMOOTH_MOVEMENT:
-					_r.y -= 3;
-					_r.w += 4;
-					_r.x -= 3;
-					_r.h += 6;
-					break;
-				case SETTINGS_BACK:
-					_r.y -= 3;
-					_r.x -= 3;
-					break;
-				default:
-					break;
-			}
-			SDL_SetRenderDrawColor(renderer, 0x90, 0x90, 0x90, 0x80);
-			SDL_RenderFillRect(renderer, &_r);
-		}
-
-		SDL_RenderCopy(renderer, m_Interactables[i], nullptr, &r);
-
-		/* numbers */
-		SDL_Rect _r = r;
-		switch (i)
-		{
-			case SETTINGS_SMOOTH_MOVEMENT:
-				_r.x += (Globals::SCREEN_WIDTH * 5) / 16;
-				SDL_RenderCopy(renderer, m_SmoothMovement ? m_Smooth : m_Discrete, nullptr, &_r);
-				break;
-			default:
-				break;
-		}
+		m_UILabel[i].Render(renderer);
+	}
+	for (int i = 0; i < SETTINGS_UI_BUTTON_TOTAL; i++)
+	{
+		m_UIButton[i].Render(renderer);
 	}
 }
 
 bool SettingsLayout::CreateLayout(SDL_Renderer *renderer)
 {
-	if (!(m_Title = Utilities::CreateTextureFromString(renderer,
-		Game::Instance().Resources().GetFont(), "settings"))
-		|| !(m_Interactables[SETTINGS_SMOOTH_MOVEMENT] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "movement"))
-		|| !(m_Interactables[SETTINGS_BACK] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "   back   "))
-		|| !(m_Smooth = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "smooth"))
-		|| !(m_Discrete = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "discrete")))
+	TTF_Font *font = Game::Instance().Resources().GetFont();
+	
+	if (!m_UILabel[SETTINGS_UI_LABEL_TITLE].Create("settings", font, renderer, 0.5f, 0.125f, true, 0.8f)
+		|| !m_UILabel[SETTINGS_UI_LABEL_SMOOTH].Create("smooth", font, renderer,
+			0.53125f, 0.28152f, true, 0.45f, TEXT_ANCHOR_MID_LEFT)
+		|| !m_UILabel[SETTINGS_UI_LABEL_DISCRETE].Create("discrete", font, renderer,
+			0.53125f, 0.28152f, false, 0.45f, TEXT_ANCHOR_MID_LEFT))
+	{
+		return false;
+	}
+	if (!m_UIButton[SETTINGS_UI_BUTTON_BACK].Create("back", font, renderer,
+		0.5f, 0.875f, true, SettingBackButtonEventHandler, 0.5f)
+		|| !m_UIButton[SETTINGS_UI_BUTTON_MOVEMENT].Create("movement", font, renderer,
+			0.46875f, 0.28152f, true, SettingMovementButtonEventHandler, 0.45f, TEXT_ANCHOR_MID_RIGHT))
 	{
 		return false;
 	}
 
-	m_Selected = SETTINGS_BACK;
+	m_UIButton[SETTINGS_UI_BUTTON_BACK].Select(true);
+	m_SelectedButton = SETTINGS_UI_BUTTON_BACK;
 
 	return true;
 }
 
 void SettingsLayout::DestroyLayout()
 {
-	SDL_DestroyTexture(m_Title);
-	SDL_DestroyTexture(m_Interactables[SETTINGS_SMOOTH_MOVEMENT]);
-	SDL_DestroyTexture(m_Interactables[SETTINGS_BACK]);
-	SDL_DestroyTexture(m_Smooth);
-	SDL_DestroyTexture(m_Discrete);
 }

@@ -6,7 +6,7 @@ MenuScreen::MenuScreen()
 {
 	m_CurrentLayout = &Globals::menuLayout;
 	m_Demo.Initilaize(HandleEventsDemo, HandleCollisionsDemo,
-		RenderDemo, 60, true, 30, true);
+		RenderDemo, true, 60, 30, 10, true);
 }
 
 void MenuScreen::Enter(GameEvent event)

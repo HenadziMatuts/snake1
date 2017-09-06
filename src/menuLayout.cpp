@@ -6,8 +6,9 @@
 UILayout* MenuLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
 {
 	UILayout *newLayout = nullptr;
+	MenuAction a = MENU_ACTION_NONE;
 
-	switch (HandleInput(event))
+	switch (a = HandleInput(event))
 	{
 		case MENU_ACTION_START_GAME:
 			SetPauseLayout(false);
@@ -28,7 +29,10 @@ UILayout* MenuLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
 			break;
 	}
 
-	ResetTimer();
+	if (a != MENU_ACTION_NONE)
+	{
+		ResetTimer();
+	}
 	return newLayout;
 }
 
@@ -45,9 +49,15 @@ GameEvent MenuLayout::Update(uint32_t elapsed)
 		m_IsInviteVisible = !m_IsInviteVisible;
 		m_Timer -= 750;
 
-		if (!m_IsInviteVisible)
+		if (m_IsInviteVisible)
 		{
-			m_CurrentActiveIndex = Utilities::ModuloSum(m_CurrentActiveIndex, 1, m_ActiveInvites.size());
+			m_UILabel[m_ActiveInvites[m_VisibleActiveInviteIndex]].SetVisibility(true);
+		}
+		else
+		{
+			m_UILabel[m_ActiveInvites[m_VisibleActiveInviteIndex]].SetVisibility(false);
+			m_VisibleActiveInviteIndex =
+				Utilities::ModuloSum(m_VisibleActiveInviteIndex, 1, m_ActiveInvites.size());
 		}
 	}
 
@@ -56,55 +66,39 @@ GameEvent MenuLayout::Update(uint32_t elapsed)
 
 void MenuLayout::Render(SDL_Renderer *renderer)
 {
-	SDL_Rect r = { Globals::SCREEN_WIDTH / 8, Globals::SCREEN_HEIGHT / 12,
-		(Globals::SCREEN_WIDTH * 3) / 4, Globals::SCREEN_HEIGHT / 3 };
-	SDL_RenderCopy(renderer, m_Title, nullptr, &r);
-
-	if (m_IsInviteVisible)
+	for (int i = 0; i < MENU_UI_TOTAL; i++)
 	{
-		r = { Globals::SCREEN_WIDTH / 5, (Globals::SCREEN_HEIGHT * 3) / 4, 
-			(Globals::SCREEN_WIDTH * 3) / 5, Globals::SCREEN_HEIGHT / 16 };
-		SDL_RenderCopy(renderer, m_Invite[m_ActiveInvites[m_CurrentActiveIndex]], nullptr, &r);
+		m_UILabel[i].Render(renderer);
 	}
 }
 
 bool MenuLayout::CreateLayout(SDL_Renderer *renderer)
 {
-	if (!(m_Title = Utilities::CreateTextureFromString(renderer,
-		Game::Instance().Resources().GetFont(), "snake !"))
-		|| !(m_Invite[MENU_INVITE_START] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "press space to start"))
-		|| !(m_Invite[MENU_INVITE_SETTINGS] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "press s to settings"))
-		|| !(m_Invite[MENU_INVITE_EXIT] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "   press x to win   "))
-		|| !(m_Invite[MENU_INVITE_RESUME] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), "press space to resume"))
-		|| !(m_Invite[MENU_INVITE_RESTART] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), " press r to restart "))
-		|| !(m_Invite[MENU_INVITE_CREDITS] = Utilities::CreateTextureFromString(renderer,
-			Game::Instance().Resources().GetFont(), " press c to credits ")))
+	TTF_Font *font = Game::Instance().Resources().GetFont();
+
+	if (!m_UILabel[MENU_UI_TITLE].Create("snake !", font, renderer, 0.5f, 0.25f, true, 1.75f)
+		|| !m_UILabel[MENU_UI_INVITE_START].Create("press space to start", font, renderer, 0.5f, 0.75f, false, 0.45f)
+		|| !m_UILabel[MENU_UI_INVITE_SETTINGS].Create("press s to settings", font, renderer, 0.5f, 0.75f, false, 0.45f)
+		|| !m_UILabel[MENU_UI_INVITE_EXIT].Create("press x to win", font, renderer, 0.5f, 0.75f, false, 0.45f)
+		|| !m_UILabel[MENU_UI_INVITE_RESUME].Create("press space to resume", font, renderer, 0.5f, 0.75f, false, 0.45f)
+		|| !m_UILabel[MENU_UI_INVITE_RESTART].Create("press r to restart", font, renderer, 0.5f, 0.75f, false, 0.45f)
+		|| !m_UILabel[MENU_UI_INVITE_CREDITS].Create("press c to credits", font, renderer, 0.5f, 0.75f, false, 0.45f))
 	{
 		return false;
 	}
 
-	m_ActiveInvites.push_back(MENU_INVITE_START);
-	m_ActiveInvites.push_back(MENU_INVITE_SETTINGS);
-	m_ActiveInvites.push_back(MENU_INVITE_EXIT);
-	m_CurrentActiveIndex = 0;
+	m_ActiveInvites.push_back(MENU_UI_INVITE_START);
+	m_ActiveInvites.push_back(MENU_UI_INVITE_SETTINGS);
+	m_ActiveInvites.push_back(MENU_UI_INVITE_EXIT);
+
+	m_VisibleActiveInviteIndex = 0;
 
 	return true;
 }
 
 void MenuLayout::DestroyLayout()
 {
-	SDL_DestroyTexture(m_Title);
-	SDL_DestroyTexture(m_Invite[0]);
-	SDL_DestroyTexture(m_Invite[1]);
-	SDL_DestroyTexture(m_Invite[2]);
-	SDL_DestroyTexture(m_Invite[3]);
-	SDL_DestroyTexture(m_Invite[4]);
-	SDL_DestroyTexture(m_Invite[5]);
+	m_ActiveInvites.clear();
 }
 
 void MenuLayout::SetPauseLayout(bool set)
@@ -114,21 +108,19 @@ void MenuLayout::SetPauseLayout(bool set)
 	if (set && !m_IsPaused)
 	{
 		m_ActiveInvites.clear();
-		m_ActiveInvites.push_back(MENU_INVITE_RESUME);
-		m_ActiveInvites.push_back(MENU_INVITE_RESTART);
-		m_ActiveInvites.push_back(MENU_INVITE_SETTINGS);
-		m_ActiveInvites.push_back(MENU_INVITE_EXIT);
-		m_CurrentActiveIndex = 0;
+		m_ActiveInvites.push_back(MENU_UI_INVITE_RESUME);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_RESTART);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_SETTINGS);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_EXIT);
 
 		m_IsPaused = true;
 	}
 	else if (!set && m_IsPaused)
 	{
 		m_ActiveInvites.clear();
-		m_ActiveInvites.push_back(MENU_INVITE_START);
-		m_ActiveInvites.push_back(MENU_INVITE_SETTINGS);
-		m_ActiveInvites.push_back(MENU_INVITE_EXIT);
-		m_CurrentActiveIndex = 0;
+		m_ActiveInvites.push_back(MENU_UI_INVITE_START);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_SETTINGS);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_EXIT);
 
 		m_IsPaused = false;
 	}
@@ -137,8 +129,10 @@ void MenuLayout::SetPauseLayout(bool set)
 void MenuLayout::ResetTimer()
 {
 	m_Timer = 0;
-	m_CurrentActiveIndex = 0;
 	m_IsInviteVisible = false;
+
+	m_UILabel[m_ActiveInvites[m_VisibleActiveInviteIndex]].SetVisibility(false);
+	m_VisibleActiveInviteIndex = 0;
 }
 
 MenuAction MenuLayout::HandleInput(SDL_Event *event)
