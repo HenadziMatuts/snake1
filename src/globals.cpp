@@ -12,6 +12,7 @@ int Globals::BODY_SIZE = 10;
 bool Globals::BORDERLESS = true;
 
 bool Globals::SMOOTH_MOVEMENT = true;
+ColorScheme Globals::COLOR_SCHEME;
 
 FILE *Globals::LOG = stderr;
 

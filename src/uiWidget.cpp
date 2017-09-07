@@ -15,14 +15,14 @@ Texture::~Texture()
 	}
 }
 
-bool Texture::Create(char *text, TTF_Font *font, SDL_Renderer *renderer)
+bool Texture::Create(char *text, TTF_Font *font, SDL_Color *rgba, SDL_Renderer *renderer)
 {
 	if (m_Texture)
 	{
 		SDL_DestroyTexture(m_Texture);
 	}
 
-	m_Texture = Utilities::CreateTextureFromString(renderer, font, text);
+	m_Texture = Utilities::CreateTextureFromString(renderer, font, rgba, text);
 	if (!m_Texture)
 	{
 		return false;
@@ -51,10 +51,10 @@ void Texture::Render(SDL_Renderer *renderer, SDL_Rect *dst)
 	}
 }
 
-bool UILabel::Create(char *text, TTF_Font *font, SDL_Renderer *renderer,
+bool UILabel::Create(char *text, TTF_Font *font, SDL_Color *rgba, SDL_Renderer *renderer,
 				float x, float y, bool isVisible, float scaleFactor, TextAnchor anchor)
 {
-	if (!m_Texture.Create(text, font, renderer))
+	if (!m_Texture.Create(text, font, rgba, renderer))
 	{
 		return false;
 	}
@@ -98,6 +98,7 @@ bool UILabel::Create(char *text, TTF_Font *font, SDL_Renderer *renderer,
 	}
 
 	m_Font = nullptr;
+	m_TextColor = *rgba;
 	strcpy_s(m_Text, text);
 
 	m_X = x;
@@ -135,7 +136,7 @@ void UILabel::Render(SDL_Renderer *renderer)
 {
 	if (m_TextChanged)
 	{
-		if (!this->Create(m_Text, m_Font, renderer,
+		if (!this->Create(m_Text, m_Font, &m_TextColor, renderer,
 			m_X, m_Y, m_IsVisible, m_ScaleFactor, m_Anchor))
 		{
 			LOG_ERR("failed changing label texture");
@@ -162,11 +163,11 @@ bool UILabel::GetDimensions(SDL_Rect *dimensions)
 	return m_TextChanged ? false : true;
 }
 
-bool UIButton::Create(char *text, TTF_Font *font, SDL_Renderer *renderer,
-				float x, float y, bool isVisible, pfnButtonEventHandler eventHandler,
-				float scaleFactor, TextAnchor anchor)
+bool UIButton::Create(char *text, TTF_Font *font, SDL_Color *rgbaText, SDL_Color *rgbaSelector,
+				SDL_Renderer *renderer, float x, float y, bool isVisible,
+				pfnButtonEventHandler eventHandler, float scaleFactor, TextAnchor anchor)
 {
-	if (!m_Texture.Create(text, font, renderer))
+	if (!m_Texture.Create(text, font, rgbaText, renderer))
 	{
 		return false;
 	}
@@ -236,6 +237,8 @@ bool UIButton::Create(char *text, TTF_Font *font, SDL_Renderer *renderer,
 	m_Selector.w += minx;
 
 	strcpy_s(m_Text, text);
+	m_SelectorColor = *rgbaSelector;
+
 	m_IsVisible = isVisible;
 	m_IsSelected = false;
 	m_EventHandler = eventHandler;
@@ -254,7 +257,8 @@ void UIButton::Render(SDL_Renderer *renderer)
 	{
 		if (m_IsSelected)
 		{
-			SDL_SetRenderDrawColor(renderer, 0x90, 0x90, 0x90, 0x80);
+			SDL_SetRenderDrawColor(renderer,
+				m_SelectorColor.r, m_SelectorColor.g, m_SelectorColor.b, m_SelectorColor.a);
 			SDL_RenderFillRect(renderer, &m_Selector);
 		}
 

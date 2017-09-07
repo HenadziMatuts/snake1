@@ -24,7 +24,7 @@ public:
 	 * Creates SDL_Texture from given font and string.
 	 */
 	static SDL_Texture* CreateTextureFromString(SDL_Renderer *renderer,
-							TTF_Font *font, const char *str);
+							TTF_Font *font, SDL_Color *rgba, const char *str);
 
 	/**
 	 * Show OS native error message box and exit application. 

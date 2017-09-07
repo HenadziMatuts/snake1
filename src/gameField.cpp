@@ -280,6 +280,11 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 	uint32_t headCellIndex = (_this->m_GridDimension * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
 	uint32_t tailCellIndex = (_this->m_GridDimension * _this->m_Snake.TailPosX()) + _this->m_Snake.TailPosY();
 
+	SDL_Color borderc = Globals::COLOR_SCHEME.m_Border;
+	SDL_Color emptyc = Globals::COLOR_SCHEME.m_CellEmpty;
+	SDL_Color snakec = Globals::COLOR_SCHEME.m_CellSnake;
+	SDL_Color foodc = Globals::COLOR_SCHEME.m_CellFood;
+	
 	if (!_this->m_IsBorderless)
 	{
 		SDL_Rect r = _this->m_FieldRect;
@@ -287,12 +292,11 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 		r.y -= _this->m_UpLeftCornOffset / 2;
 		r.w += _this->m_UpLeftCornOffset;
 		r.h += _this->m_UpLeftCornOffset;
-
-		SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+		SDL_SetRenderDrawColor(renderer, borderc.r, borderc.g, borderc.b, borderc.a);
 		SDL_RenderFillRect(renderer, &r);
 	}
 
-	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+	SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 	SDL_RenderFillRect(renderer, &_this->m_FieldRect);
 
 	for (uint32_t i = 0; i < _this->m_GridDimension; i++)
@@ -303,11 +307,11 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 			switch (_this->m_Grid[row + j].m_State)
 			{
 				case CELL_STATE_SNAKE:
-					SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+					SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
 					SDL_RenderFillRect(renderer, &_this->m_Grid[row + j].m_Rect);
 					break;
 				case CELL_STATE_FOOD:
-					SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+					SDL_SetRenderDrawColor(renderer, foodc.r, foodc.g, foodc.b, foodc.a);
 					SDL_RenderFillRect(renderer, &_this->m_Grid[row + j].m_Rect);
 					break;
 				default:
@@ -322,17 +326,17 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 		float f = (float)_this->m_Elapsed / (1000 / _this->m_GameSpeed);
 		float dw, dh;
 
-		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 		SDL_RenderFillRect(renderer, &_this->m_Grid[headCellIndex].m_Rect);
 		SDL_RenderFillRect(renderer, &_this->m_Grid[tailCellIndex].m_Rect);
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
+		SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
+		
 		/* head cell */
 		SDL_Rect r = _this->m_Grid[headCellIndex].m_Rect;
 
 		if (_this->m_Snake.Growing() == GROWING_STEP_1)
 		{
-			SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+			SDL_SetRenderDrawColor(renderer, foodc.r, foodc.g, foodc.b, foodc.a);
 			SDL_RenderFillRect(renderer, &r);
 		}
 
@@ -377,7 +381,7 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 				r.h -= (int)(floorf(dh));
 			}
 		}
-		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
 		SDL_RenderFillRect(renderer, &r);
 
 		/* tail */
@@ -390,7 +394,7 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 			int penultSegmentPosY = _this->m_Snake.SegmentPosY(bodySize - 1, _this->m_GridDimension);
 			uint32_t penultSegmentCellIndex = (_this->m_GridDimension * penultSegmentPosX) + penultSegmentPosY;
 
-			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 			SDL_RenderFillRect(renderer, &_this->m_Grid[penultSegmentCellIndex].m_Rect);
 
 			cellIndex = penultSegmentCellIndex;
@@ -400,7 +404,7 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 
 		if (_this->m_Snake.Growing() == GROWING_STEP_2)
 		{
-			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 			SDL_RenderFillRect(renderer, &r);
 		}
 		else
@@ -425,7 +429,7 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 				}
 				r.h -= (int)(floorf(dh));
 			}
-			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
 			SDL_RenderFillRect(renderer, &r);
 		}
 	}
@@ -434,7 +438,7 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 	{
 		if (_this->m_Snake.IsCrossedTheBound())
 		{
-			SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+			SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 			SDL_RenderFillRect(renderer, &_this->m_Grid[headCellIndex].m_Rect);
 		}
 
@@ -442,24 +446,24 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 		{
 			if (_this->m_Snake.Growing() != GROWING_FINISHED)
 			{
-				SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+				SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 			}
 			else
 			{
-				SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+				SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
 			}
 			SDL_RenderFillRect(renderer, &_this->m_Grid[tailCellIndex].m_Rect);
 		}
 		else
 		{
-			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
 			SDL_RenderFillRect(renderer, &_this->m_Grid[tailCellIndex].m_Rect);
 			
 			if (_this->m_Snake.Growing() == GROWING_FINISHED)
 			{
 				tailCellIndex -= _this->m_GridDimension * _this->m_Snake.TailDirX();
 				tailCellIndex -= _this->m_Snake.TailDirY();
-				SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+				SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
 				SDL_RenderFillRect(renderer, &_this->m_Grid[tailCellIndex].m_Rect);
 			}
 		}
@@ -521,7 +525,9 @@ InGameEvent HandleCollisionsDemo(GameField *_this)
 
 void RenderDemo(GameField *_this, SDL_Renderer *renderer)
 {
-	SDL_SetRenderDrawColor(renderer, 0x80, 0x80, 0x80, 0xFF);
+	SDL_Color democ = Globals::COLOR_SCHEME.m_CellDemo;
+
+	SDL_SetRenderDrawColor(renderer, democ.r, democ.g, democ.b, democ.a);
 	for (uint32_t i = 0; i < _this->m_GridDimension; i++)
 	{
 		uint32_t row = _this->m_GridDimension * i;

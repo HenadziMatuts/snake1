@@ -150,7 +150,9 @@ SDL_Renderer* Game::GetRenderer()
 
 void Game::Render(GameScreen *screen)
 {
-	SDL_SetRenderDrawColor(m_Renderer, 0xE0, 0xE0, 0xE0, 0xFF);
+	SDL_Color bg = Globals::COLOR_SCHEME.m_Bg;
+
+	SDL_SetRenderDrawColor(m_Renderer, bg.r, bg.g, bg.b, bg.a);
 	SDL_RenderClear(m_Renderer);
 
 	screen->Render(m_Renderer);

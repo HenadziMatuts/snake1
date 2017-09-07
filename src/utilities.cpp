@@ -59,12 +59,12 @@ unsigned int Utilities::ModuloSum(int a, int b, unsigned int m)
  * Creates SDL_Texture from given font and string.
  */
 SDL_Texture* Utilities::CreateTextureFromString(SDL_Renderer *renderer,
-							TTF_Font *font, const char *str)
+							TTF_Font *font, SDL_Color *rgba, const char *str)
 {
 	SDL_Surface *textSurface = nullptr;
 	SDL_Texture *newTexture = nullptr;
 
-	textSurface = TTF_RenderText_Solid(font, str, { 0, 0, 0 });
+	textSurface = TTF_RenderText_Solid(font, str, { rgba->r, rgba->g, rgba->b, rgba->a });
 	if (!textSurface)
 	{
 		LOG_ERR("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
