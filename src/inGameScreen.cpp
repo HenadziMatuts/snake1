@@ -45,9 +45,9 @@ void Scoreboard::Render(SDL_Renderer *renderer, SDL_Rect *viewport)
 	TTF_Font *font = Game::Instance().Resources().GetFont();
 
 	if (m_ScoreLabel.Create(m_ScoreText, font, renderer,
-		(float)(viewport->x + viewport->w) / Globals::SCREEN_WIDTH,
+		(float)(viewport->x) / Globals::SCREEN_WIDTH,
 		(float)(viewport->y) / Globals::SCREEN_HEIGHT,
-		true, 0.4f, TEXT_ANCROR_TOP_RIGHT))
+		true, 0.4f, TEXT_ANCHOR_TOP_LEFT))
 	{
 		m_ScoreLabel.Render(renderer);
 	}
@@ -55,9 +55,9 @@ void Scoreboard::Render(SDL_Renderer *renderer, SDL_Rect *viewport)
 	if (m_GameMode == GAME_MODE_SURVIVAL)
 	{
 		if (m_DiemerLabel.Create(m_DiemerText, font, renderer,
-			(float)(viewport->x + viewport->w) / Globals::SCREEN_WIDTH,
+			(float)(viewport->x) / Globals::SCREEN_WIDTH,
 			(float)(viewport->y * 4) / Globals::SCREEN_HEIGHT,
-			true, 0.4f, TEXT_ANCROR_TOP_RIGHT))
+			true, 0.4f, TEXT_ANCHOR_TOP_LEFT))
 		{
 			m_DiemerLabel.Render(renderer);
 		}
