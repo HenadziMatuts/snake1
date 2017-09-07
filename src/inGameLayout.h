@@ -19,7 +19,8 @@ enum InGameUIButton
 class InGameLayout : public UILayout {
 public:
 	InGameLayout() :
-		m_SnakeDied(false)
+		m_SnakeDied(false),
+		m_SelectedButton(IN_GAME_UI_BUTTON_YES)
 	{};
 
 	UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen);
@@ -32,12 +33,10 @@ public:
 	void SnakeDied(int score);
 
 private:
-	bool m_SnakeDied;
-
 	SDL_Rect m_DialogFrame;
-
 	UILabel m_UILabel[IN_GAME_UI_LABEL_TOTAL];
 	UIButton m_UIButton[IN_GAME_UI_BUTTON_TOTAL];
 
 	InGameUIButton m_SelectedButton;
+	bool m_SnakeDied;
 };

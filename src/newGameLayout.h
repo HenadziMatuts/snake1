@@ -38,8 +38,8 @@ struct NewGameSettings
 {
 	NewGameSettings() :
 		m_Mode(GAME_MODE_TRAINING),
-		m_GridDimension(55),
-		m_GameSpeed(20),
+		m_GridDimension(40),
+		m_GameSpeed(10),
 		m_BodySize(10),
 		m_IsBorderless(true)
 	{};
@@ -53,6 +53,10 @@ struct NewGameSettings
 
 class NewGameLayout : public UILayout {
 public:
+	NewGameLayout() :
+		m_SelectedButton(NEW_GAME_UI_BUTTON_START)
+	{};
+
 	void Enter();
 
 	UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen);
@@ -67,6 +71,5 @@ private:
 	UIButton m_UIButton[NEW_GAME_UI_BUTTON_TOTAL];
 
 	NewGameUIButton m_SelectedButton;
-
 	NewGameSettings m_Settings;
 };

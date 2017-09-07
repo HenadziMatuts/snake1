@@ -181,6 +181,11 @@ void NewGameLayout::Enter()
 	m_Settings.m_GameSpeed = Globals::GAME_SPEED;
 	m_Settings.m_BodySize = Globals::BODY_SIZE;
 	m_Settings.m_IsBorderless = Globals::BORDERLESS;
+
+	m_UIButton[m_SelectedButton].Select(false);
+	m_SelectedButton = NEW_GAME_UI_BUTTON_START;
+	m_UIButton[m_SelectedButton].Select(true);
+	
 }
 
 UILayout *NewGameLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
@@ -280,23 +285,17 @@ bool NewGameLayout::CreateLayout(SDL_Renderer *renderer)
 	if (!m_UILabel[NEW_GAME_UI_LABEL_TITLE].Create("set up a new game", font, textc, renderer, 0.5f, 0.125f, true, 0.8f)
 
 		|| !m_UILabel[NEW_GAME_UI_LABEL_TRAINING].Create("training", font, textc, renderer,
-			0.53125f, (float)9 / 32, true, 0.45f, TEXT_ANCHOR_MID_LEFT)
-
+			0.53125f, (float)9 / 32, false, 0.45f, TEXT_ANCHOR_MID_LEFT)
 		|| !m_UILabel[NEW_GAME_UI_LABEL_SURVIVAL].Create("survival", font, textc, renderer,
 			0.53125f, (float)9 / 32, false, 0.45f, TEXT_ANCHOR_MID_LEFT)
-
 		|| !m_UILabel[NEW_GAME_UI_LABEL_FIELD_SIZE].Create("40", font, textc, renderer,
 			0.53125f, (float)51 / 128, true, 0.45f, TEXT_ANCHOR_MID_LEFT)
-
 		|| !m_UILabel[NEW_GAME_UI_LABEL_SPEED].Create("10", font, textc, renderer,
 			0.53125f, (float)33 / 64, true, 0.45f, TEXT_ANCHOR_MID_LEFT)
-
 		|| !m_UILabel[NEW_GAME_UI_LABEL_BODY_SIZE].Create("10", font, textc, renderer,
 			0.53125f, (float)81 / 128, true, 0.45f, TEXT_ANCHOR_MID_LEFT)
-
 		|| !m_UILabel[NEW_GAME_UI_LABEL_BORDERLESS].Create("yes", font, textc, renderer,
-			0.53125f, (float)3 / 4, true, 0.45f, TEXT_ANCHOR_MID_LEFT)
-
+			0.53125f, (float)3 / 4, false, 0.45f, TEXT_ANCHOR_MID_LEFT)
 		|| !m_UILabel[NEW_GAME_UI_LABEL_NOT_BORDERLESS].Create("no", font, textc, renderer,
 			0.53125f, (float)3 / 4, false, 0.45f, TEXT_ANCHOR_MID_LEFT)
 		)
@@ -306,29 +305,21 @@ bool NewGameLayout::CreateLayout(SDL_Renderer *renderer)
 	
 	if(!m_UIButton[NEW_GAME_UI_BUTTON_MODE].Create("game mode", font, textc, selectorc, renderer,
 		0.46875f, (float)9 / 32, true, NewGameModeButtonEventHandler, 0.45f, TEXT_ANCHOR_MID_RIGHT)
-
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_FIELD_SIZE].Create("field size", font, textc, selectorc, renderer,
 			0.46875f, (float)51 / 128, true, NewGameFieldSizeButtonEventHandler, 0.45f, TEXT_ANCHOR_MID_RIGHT)
-
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_SPEED].Create("game speed", font, textc, selectorc, renderer,
 			0.46875f, (float)33 / 64, true, NewGameGameSpeedButtonEventHandler, 0.45f, TEXT_ANCHOR_MID_RIGHT)
-
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_BODY_SIZE].Create("body size", font, textc, selectorc, renderer,
 			0.46875f, (float)81 / 128, true, NewGameBodySizeButtonEventHandler, 0.45f, TEXT_ANCHOR_MID_RIGHT)
-
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_IS_BORDERLESS].Create("borderless", font, textc, selectorc, renderer,
 			0.46875f, (float)3 / 4, true, NewGameBorderlessButtonEventHandler, 0.45f, TEXT_ANCHOR_MID_RIGHT)
-
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_START].Create("start", font, textc, selectorc, renderer,
 			0.46875f, 0.90625f, true, NewGameStartButtonEventHandler, 0.5f, TEXT_ANCHOR_MID_RIGHT)
-
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_BACK].Create("back", font, textc, selectorc, renderer,
 			0.53125f, 0.90625f, true, NewGameBackButtonEventHandler, 0.5f, TEXT_ANCHOR_MID_LEFT))
 	{
 		return false;
 	}
-
-	m_SelectedButton = NEW_GAME_UI_BUTTON_START;
 	m_UIButton[m_SelectedButton].Select(true);
 
 	return true;

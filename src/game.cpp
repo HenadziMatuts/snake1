@@ -76,10 +76,7 @@ void Game::Initialize()
 	LOG_INFO("Loading resources...OK");
 
 	LOG_INFO("Building UI...");
-	if (!Globals::menuLayout.CreateLayout(m_Renderer)
-		|| !Globals::inGameLayout.CreateLayout(m_Renderer)
-		|| !Globals::settingsLayout.CreateLayout(m_Renderer)
-		|| !Globals::newGameLayout.CreateLayout(m_Renderer))
+	if (!RebuidUI())
 	{
 		LOG_FATAL("Unable to build UI");
 		CRASH(ExitCallback);
@@ -98,7 +95,7 @@ int Game::Run()
 	uint32_t prev = SDL_GetTicks(), curr, elapsed;
 
 	LOG_INFO("Snake! game started");
-	
+
 	/* game loop */
 	while (!quit)
 	{
@@ -143,9 +140,17 @@ int Game::Run()
 	return Quit();
 }
 
-SDL_Renderer* Game::GetRenderer()
+bool Game::RebuidUI()
 {
-	return m_Renderer;
+	if (!Globals::menuLayout.CreateLayout(m_Renderer)
+		|| !Globals::inGameLayout.CreateLayout(m_Renderer)
+		|| !Globals::settingsLayout.CreateLayout(m_Renderer)
+		|| !Globals::newGameLayout.CreateLayout(m_Renderer))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void Game::Render(GameScreen *screen)

@@ -22,7 +22,7 @@ public:
 	 */
 	int Run();
 
-	SDL_Renderer* GetRenderer();
+	bool RebuidUI();
 
 private:
 	Game() :

@@ -155,7 +155,6 @@ bool InGameLayout::CreateLayout(SDL_Renderer *renderer)
 	{
 		return false;
 	}
-
 	if (!m_UIButton[IN_GAME_UI_BUTTON_YES].Create("yes", font, textc, selectorc, renderer,
 		0.45f, 0.8875f, true, InGameYesButtonEventHandler, 0.5f, TEXT_ANCHOR_MID_RIGHT)
 		|| !m_UIButton[IN_GAME_UI_BUTTON_NO].Create("no", font, textc, selectorc, renderer,
@@ -163,8 +162,6 @@ bool InGameLayout::CreateLayout(SDL_Renderer *renderer)
 	{
 		return false;
 	}
-
-	m_SelectedButton = IN_GAME_UI_BUTTON_YES;
 	m_UIButton[m_SelectedButton].Select(true);
 
 	m_DialogFrame.y = (Globals::SCREEN_HEIGHT * 5) / 8;

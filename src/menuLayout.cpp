@@ -88,10 +88,20 @@ bool MenuLayout::CreateLayout(SDL_Renderer *renderer)
 		return false;
 	}
 
-	m_ActiveInvites.push_back(MENU_UI_INVITE_START);
-	m_ActiveInvites.push_back(MENU_UI_INVITE_SETTINGS);
-	m_ActiveInvites.push_back(MENU_UI_INVITE_EXIT);
-
+	m_ActiveInvites.clear();
+	if (m_IsPaused)
+	{
+		m_ActiveInvites.push_back(MENU_UI_INVITE_RESUME);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_RESTART);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_SETTINGS);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_EXIT);
+	}
+	else
+	{
+		m_ActiveInvites.push_back(MENU_UI_INVITE_START);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_SETTINGS);
+		m_ActiveInvites.push_back(MENU_UI_INVITE_EXIT);
+	}
 	m_VisibleActiveInviteIndex = 0;
 
 	return true;

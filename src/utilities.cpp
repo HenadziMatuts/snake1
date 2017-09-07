@@ -64,7 +64,7 @@ SDL_Texture* Utilities::CreateTextureFromString(SDL_Renderer *renderer,
 	SDL_Surface *textSurface = nullptr;
 	SDL_Texture *newTexture = nullptr;
 
-	textSurface = TTF_RenderText_Solid(font, str, { rgba->r, rgba->g, rgba->b, rgba->a });
+	textSurface = TTF_RenderText_Blended(font, str, { rgba->r, rgba->g, rgba->b, rgba->a });
 	if (!textSurface)
 	{
 		LOG_ERR("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
