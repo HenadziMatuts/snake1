@@ -43,7 +43,7 @@ void Scoreboard::Stop()
 void Scoreboard::Render(SDL_Renderer *renderer, SDL_Rect *viewport)
 {	
 	TTF_Font *font = Game::Instance().Resources().GetFont();
-	SDL_Color *textc = &Globals::COLOR_SCHEME.m_Text;
+	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
 
 	if (m_ScoreLabel.Create(m_ScoreText, font, textc, renderer,
 		(float)(viewport->x) / Globals::SCREEN_WIDTH,

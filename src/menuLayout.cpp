@@ -75,9 +75,9 @@ void MenuLayout::Render(SDL_Renderer *renderer)
 bool MenuLayout::CreateLayout(SDL_Renderer *renderer)
 {
 	TTF_Font *font = Game::Instance().Resources().GetFont();
-	SDL_Color *textc = &Globals::COLOR_SCHEME.m_Text;
+	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
 
-	if (!m_UILabel[MENU_UI_TITLE].Create("snake !", font, textc, renderer, 0.5f, 0.25f, true, 1.75f)
+	if (!m_UILabel[MENU_UI_TITLE].Create("snake !", font, textc, renderer, 0.5f, 0.25f, true, 1.8f)
 		|| !m_UILabel[MENU_UI_INVITE_START].Create("press space to start", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
 		|| !m_UILabel[MENU_UI_INVITE_SETTINGS].Create("press s to settings", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
 		|| !m_UILabel[MENU_UI_INVITE_EXIT].Create("press x to win", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)

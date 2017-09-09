@@ -11,6 +11,13 @@
 
 namespace Globals
 {
+	/* log file handle */
+	extern FILE *LOG;
+	/* default "classic grey color scheme" */
+	extern ColorScheme defaultColorScheme;
+	/* current time as ascii string */
+	extern char ASCII_TIME[128];
+
 	/* window properties */
 	extern int SCREEN_WIDTH;
 	extern int SCREEN_HEIGHT;
@@ -25,13 +32,7 @@ namespace Globals
 	
 	/*settings*/
 	extern bool SMOOTH_MOVEMENT;
-	extern ColorScheme COLOR_SCHEME;
-
-	/* log file handle */
-	extern FILE *LOG;
-
-	/* current time as ascii string */
-	extern char ASCII_TIME[128];
+	extern ColorScheme *COLOR_SCHEME;
 
 	extern MenuScreen menuScreen;
 	extern InGameScreen inGameScreen;
@@ -42,5 +43,9 @@ namespace Globals
 	extern SettingsLayout settingsLayout;
 
 	char* Time();
-	void ChangeColorScheme(ColorSchemeName name);
+
+	char* ChangeColorScheme(bool prev);
+	void AddColorScheme(ColorScheme *scheme);
+	bool IsUniqueColorSchemeName(char *name);
+	void DestroyColorSchemes();
 }

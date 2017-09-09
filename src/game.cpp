@@ -30,12 +30,6 @@ void Game::Initialize()
 	}
 	LOG_INFO("Initializing SDL...OK");
 
-	/* Set texture filtering to linear */
-	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
-	{
-		LOG_WARN("Linear texture filtering not enabled!");
-	}
-
 	LOG_INFO("Creating window...");
 	m_Window = SDL_CreateWindow("snake!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 					Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
@@ -155,7 +149,7 @@ bool Game::RebuidUI()
 
 void Game::Render(GameScreen *screen)
 {
-	SDL_Color bg = Globals::COLOR_SCHEME.m_Bg;
+	SDL_Color bg = Globals::COLOR_SCHEME->m_Bg;
 
 	SDL_SetRenderDrawColor(m_Renderer, bg.r, bg.g, bg.b, bg.a);
 	SDL_RenderClear(m_Renderer);

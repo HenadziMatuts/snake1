@@ -19,16 +19,9 @@ public:
 	*/
 	TTF_Font* GetFont();
 
-	/**
-	 * Returns font.
-	 */
-	TTF_Font* GetFont(int ptsize);
-
-	/**
-	 *
-	 */
-	void DestroyFont(TTF_Font *font);
-
 private:
+	bool LoadFont();
+	bool LoadColorSchemes();
+
 	TTF_Font *m_Font;
 };

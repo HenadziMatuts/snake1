@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\colorScheme.cpp" />
     <ClCompile Include="..\src\food.cpp" />
     <ClCompile Include="..\src\game.cpp" />
     <ClCompile Include="..\src\gameField.cpp" />

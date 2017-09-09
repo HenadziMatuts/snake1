@@ -129,7 +129,7 @@ void InGameLayout::Render(SDL_Renderer *renderer)
 			m_DialogFrame.x = r.x - (r.w / 16);
 		}
 
-		SDL_Color dialogc = Globals::COLOR_SCHEME.m_DialogBox;
+		SDL_Color dialogc = Globals::COLOR_SCHEME->m_DialogBox;
 		SDL_SetRenderDrawColor(renderer, dialogc.r, dialogc.g, dialogc.b, dialogc.a);
 		SDL_RenderFillRect(renderer, &m_DialogFrame);
 
@@ -147,8 +147,8 @@ void InGameLayout::Render(SDL_Renderer *renderer)
 bool InGameLayout::CreateLayout(SDL_Renderer *renderer)
 {
 	TTF_Font *font = Game::Instance().Resources().GetFont();
-	SDL_Color *textc = &Globals::COLOR_SCHEME.m_Text;
-	SDL_Color *selectorc = &Globals::COLOR_SCHEME.m_ButtonSelector;
+	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
+	SDL_Color *selectorc = &Globals::COLOR_SCHEME->m_ButtonSelector;
 
 	if (!m_UILabel[IN_GAME_UI_LABEL_DIE_MESSAGE].Create(dieMessage[0], font, textc, renderer, 0.5f, 0.6875f, true, 0.42f)
 		|| !m_UILabel[IN_GAME_UI_LABEL_TRY_AGAIN].Create("try again?", font, textc, renderer, 0.5f, 0.7875f, true, 0.42f))
@@ -156,9 +156,9 @@ bool InGameLayout::CreateLayout(SDL_Renderer *renderer)
 		return false;
 	}
 	if (!m_UIButton[IN_GAME_UI_BUTTON_YES].Create("yes", font, textc, selectorc, renderer,
-		0.45f, 0.8875f, true, InGameYesButtonEventHandler, 0.5f, TEXT_ANCHOR_MID_RIGHT)
+		0.45f, 0.8875f, true, InGameYesButtonEventHandler, 0.47f, TEXT_ANCHOR_MID_RIGHT)
 		|| !m_UIButton[IN_GAME_UI_BUTTON_NO].Create("no", font, textc, selectorc, renderer,
-			0.56f, 0.8875f, true, InGameNoButtonEventHandler, 0.5f, TEXT_ANCHOR_MID_LEFT))
+			0.56f, 0.8875f, true, InGameNoButtonEventHandler, 0.47f, TEXT_ANCHOR_MID_LEFT))
 	{
 		return false;
 	}

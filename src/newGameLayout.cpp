@@ -279,8 +279,8 @@ void NewGameLayout::Render(SDL_Renderer *renderer)
 bool NewGameLayout::CreateLayout(SDL_Renderer *renderer)
 {
 	TTF_Font *font = Game::Instance().Resources().GetFont();
-	SDL_Color *textc = &Globals::COLOR_SCHEME.m_Text;
-	SDL_Color *selectorc = &Globals::COLOR_SCHEME.m_ButtonSelector;
+	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
+	SDL_Color *selectorc = &Globals::COLOR_SCHEME->m_ButtonSelector;
 	
 	if (!m_UILabel[NEW_GAME_UI_LABEL_TITLE].Create("set up a new game", font, textc, renderer, 0.5f, 0.125f, true, 0.8f)
 
@@ -314,9 +314,9 @@ bool NewGameLayout::CreateLayout(SDL_Renderer *renderer)
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_IS_BORDERLESS].Create("borderless", font, textc, selectorc, renderer,
 			0.46875f, (float)3 / 4, true, NewGameBorderlessButtonEventHandler, 0.45f, TEXT_ANCHOR_MID_RIGHT)
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_START].Create("start", font, textc, selectorc, renderer,
-			0.46875f, 0.90625f, true, NewGameStartButtonEventHandler, 0.5f, TEXT_ANCHOR_MID_RIGHT)
+			0.46875f, 0.90625f, true, NewGameStartButtonEventHandler, 0.55f, TEXT_ANCHOR_MID_RIGHT)
 		|| !m_UIButton[NEW_GAME_UI_BUTTON_BACK].Create("back", font, textc, selectorc, renderer,
-			0.53125f, 0.90625f, true, NewGameBackButtonEventHandler, 0.5f, TEXT_ANCHOR_MID_LEFT))
+			0.53125f, 0.90625f, true, NewGameBackButtonEventHandler, 0.55f, TEXT_ANCHOR_MID_LEFT))
 	{
 		return false;
 	}

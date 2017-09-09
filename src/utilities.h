@@ -30,6 +30,21 @@ public:
 	 * Show OS native error message box and exit application. 
 	 */
 	static void CrashMessageBox(const char *title, const char *msg, CrashCallback cb);
+
+	/**
+	 * A wrapper around WinAPI's GetPrivateProfileSectionNames().
+	 */
+	static size_t GetIniSectionNames(char *out, size_t size, const char *iniPath);
+
+	/**
+	 * A wrapper around WinAPI's GetPrivateProfileString().
+	 */
+	static size_t GetIniStringValue(char *section, char *key, char *default,
+					char *out, size_t size, const char *iniPath);
+
+	static bool IsHexString(char *str);
+
+	static bool IsBigEndian();
 };
 
 #define LOG_INFO(format, ...) fprintf(Globals::LOG, "[%s] INFO: "##format##"\n", Globals::Time(), __VA_ARGS__)

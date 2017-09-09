@@ -92,3 +92,53 @@ void Utilities::CrashMessageBox(const char *title, const char *msg, CrashCallbac
 #endif
 	cb();
 }
+
+size_t Utilities::GetIniSectionNames(char *out, size_t size, const char *iniPath)
+{
+	size_t ret = 0;
+#ifdef _WIN32
+	ret = GetPrivateProfileSectionNames(out, size, iniPath);
+#endif
+	return ret;
+}
+
+size_t Utilities::GetIniStringValue(char *section, char *key, char *default, 
+					char *out, size_t size, const char *iniPath)
+{
+	size_t ret = 0;
+#ifdef _WIN32
+	ret = GetPrivateProfileString(section, key, default, out, size, iniPath);
+#endif
+	return ret;
+}
+
+bool Utilities::IsHexString(char *str)
+{
+	if (!str)
+	{
+		return false;
+	}
+
+	while (*str != 0)
+	{
+		if((*str < '0' || *str > '9')
+			&& (*str < 'A' || *str > 'F')
+			&& (*str < 'a' || *str > 'f'))
+		{
+			return false;
+		}
+		str++;
+	}
+
+	return true;
+}
+
+bool Utilities::IsBigEndian()
+{
+	union {
+		uint32_t u;
+		char c[4];
+	} x = { 0x01020304 };
+
+	return x.c[0] == 1;
+}

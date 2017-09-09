@@ -10,8 +10,7 @@ enum SettingsUILabel
 	SETTINGS_UI_LABEL_TITLE = 0,
 	SETTINGS_UI_LABEL_SMOOTH,
 	SETTINGS_UI_LABEL_DISCRETE,
-	SETTINGS_UI_LABEL_SCHEME_GREY,
-	SETTINGS_UI_LABEL_SCHEME_MOON,
+	SETTINGS_UI_LABEL_COLOR_SCHEME,
 	SETTINGS_UI_LABEL_TOTAL
 };
 
@@ -27,11 +26,11 @@ struct GameSettings
 {
 	GameSettings() :
 		m_SmoothMovement(true),
-		m_ColorScheme(COLOR_SCHEME_CLASSIC_GREY)
+		m_ColorScheme("classic grey")
 	{};
 
 	bool m_SmoothMovement;
-	ColorSchemeName m_ColorScheme;
+	char *m_ColorScheme;
 };
 
 class SettingsLayout : public UILayout {

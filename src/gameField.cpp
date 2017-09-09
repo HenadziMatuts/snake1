@@ -280,10 +280,10 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 	uint32_t headCellIndex = (_this->m_GridDimension * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
 	uint32_t tailCellIndex = (_this->m_GridDimension * _this->m_Snake.TailPosX()) + _this->m_Snake.TailPosY();
 
-	SDL_Color borderc = Globals::COLOR_SCHEME.m_Border;
-	SDL_Color emptyc = Globals::COLOR_SCHEME.m_CellEmpty;
-	SDL_Color snakec = Globals::COLOR_SCHEME.m_CellSnake;
-	SDL_Color foodc = Globals::COLOR_SCHEME.m_CellFood;
+	SDL_Color borderc = Globals::COLOR_SCHEME->m_Border;
+	SDL_Color emptyc = Globals::COLOR_SCHEME->m_CellEmpty;
+	SDL_Color snakec = Globals::COLOR_SCHEME->m_CellSnake;
+	SDL_Color foodc = Globals::COLOR_SCHEME->m_CellFood;
 	
 	if (!_this->m_IsBorderless)
 	{
@@ -525,7 +525,7 @@ InGameEvent HandleCollisionsDemo(GameField *_this)
 
 void RenderDemo(GameField *_this, SDL_Renderer *renderer)
 {
-	SDL_Color democ = Globals::COLOR_SCHEME.m_CellDemo;
+	SDL_Color democ = Globals::COLOR_SCHEME->m_CellDemo;
 
 	SDL_SetRenderDrawColor(renderer, democ.r, democ.g, democ.b, democ.a);
 	for (uint32_t i = 0; i < _this->m_GridDimension; i++)
