@@ -54,8 +54,8 @@ void MenuScreen::Render(SDL_Renderer *renderer)
 
 void MenuScreen::Resize()
 {
-	m_Demo.Reconfigure((uint32_t)(50 * 
+	m_Demo.Resize((uint32_t)(50 *
 		(Globals::ASPECT_RATIO == ASPECT_RATIO_4_3 ? 1.33f : 1.78f)),
-		50, true, 30, 10, true, false);
+		50, true, false);
 	m_Demo.Reset();
 }

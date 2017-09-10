@@ -179,6 +179,5 @@ void InGameScreen::Restart()
 
 void InGameScreen::Resize()
 {
-	m_Field.Reconfigure(Globals::GRID_DIMENSION, Globals::GRID_DIMENSION,
-		false, Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS, true);
+	m_Field.Resize(Globals::GRID_DIMENSION, Globals::GRID_DIMENSION, false, true);
 }
