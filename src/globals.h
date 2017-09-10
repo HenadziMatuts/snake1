@@ -9,12 +9,17 @@
 #include <cstdint>
 #include <cstdio>
 
+enum AspectRatio
+{
+	ASPECT_RATIO_4_3 = 0,
+	ASPECT_RATIO_16_9
+};
+
+
 namespace Globals
 {
 	/* log file handle */
 	extern FILE *LOG;
-	/* default "classic grey color scheme" */
-	extern ColorScheme defaultColorScheme;
 	/* current time as ascii string */
 	extern char ASCII_TIME[128];
 
@@ -22,14 +27,16 @@ namespace Globals
 	extern int SCREEN_WIDTH;
 	extern int SCREEN_HEIGHT;
 	extern float WINDOW_SCALE_FACTOR;
-
+	extern AspectRatio ASPECT_RATIO;
+	extern bool FULLSCREEN;
+	
 	/* new game options*/
 	extern GameMode MODE;
 	extern uint32_t GRID_DIMENSION;
 	extern int GAME_SPEED;
 	extern int BODY_SIZE;
 	extern bool BORDERLESS;
-	
+
 	/*settings*/
 	extern bool SMOOTH_MOVEMENT;
 	extern ColorScheme *COLOR_SCHEME;
@@ -45,7 +52,4 @@ namespace Globals
 	char* Time();
 
 	char* ChangeColorScheme(bool prev);
-	void AddColorScheme(ColorScheme *scheme);
-	bool IsUniqueColorSchemeName(char *name);
-	void DestroyColorSchemes();
 }

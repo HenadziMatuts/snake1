@@ -271,6 +271,11 @@ void UIButton::SetVisibility(bool isVisible)
 	m_IsVisible = isVisible;
 }
 
+bool UIButton::IsVisible()
+{
+	return m_IsVisible;
+}
+
 void UIButton::Select(bool isSelected)
 {
 	m_IsSelected = isSelected;

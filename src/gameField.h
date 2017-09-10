@@ -38,7 +38,8 @@ class GameField {
 public:
 	GameField() :
 		m_Grid(nullptr),
-		m_GridDimension(0),
+		m_GridDimensionX(0),
+		m_GridDimensionY(0),
 		m_GameSpeed(30),
 		m_Elapsed(0),
 		m_StartBodySize(10),
@@ -47,17 +48,21 @@ public:
 	~GameField();
 
 	void Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions, pfnRender render,
-		bool stretch, uint32_t gridDimension, int speed, int startBodySize, bool borderless);
-	void Reconfigure(uint32_t gridDimension, bool stretch, int speed, int startBodySize, bool borderless);
-	void Resize(uint32_t gridDimension, bool stretch);
+			bool stretch, uint32_t gridDimensionX, uint32_t gridDimensionY,
+			int speed, int startBodySize, bool borderless);
+	void Reconfigure(uint32_t gridDimensionX, uint32_t gridDimensionY,
+			bool stretch, int speed, int startBodySize, bool borderless, bool justResize);
+	void Resize(uint32_t gridDimensionX, uint32_t gridDimensionY, bool stretch, bool justResize);
 
 	void HandleEvents(SDL_Event *event);
 	InGameEvent Update(uint32_t elapsed);
 	void Render(SDL_Renderer *renderer);
 
 	int GetCellWidth();
-	int GeUpLeftCornOffset();
-	uint32_t GetGridDimension();
+	int GeUpLeftCornOffsetX();
+	int GeUpLeftCornOffsetY();
+	uint32_t GetGridDimensionX();
+	uint32_t GetGridDimensionY();
 
 	void Stop();
 	void Reset();
@@ -77,11 +82,13 @@ private:
 	pfnHandleCollisions m_HandleCollisions;
 	pfnRender m_Render;
 
-	/* field grid properties */
-	int m_UpLeftCornOffset;
+	int m_UpLeftCornOffsetX;
+	int m_UpLeftCornOffsetY;
 
 	FieldCell *m_Grid;
-	uint32_t m_GridDimension;
+	
+	uint32_t m_GridDimensionX;
+	uint32_t m_GridDimensionY;
 
 	SDL_Rect m_FieldRect;
 	int m_CellWitdh, m_CellHeight;
@@ -101,5 +108,5 @@ private:
 
 	void SpawnSnake();
 	void SpawnFood();
-	void ClearField();
+	void RecalculateField(bool clear);
 };

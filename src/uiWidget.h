@@ -84,6 +84,7 @@ public:
 	void Render(SDL_Renderer *renderer);
 
 	void SetVisibility(bool isVisible);
+	bool IsVisible();
 	void Select(bool isSelected);
 	bool IsSelected();
 

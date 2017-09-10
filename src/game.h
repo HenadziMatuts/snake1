@@ -3,6 +3,7 @@
 #include "gameScreen.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <vector>
 
 /**
  * Main Snake game class.
@@ -22,7 +23,25 @@ public:
 	 */
 	int Run();
 
+	/**
+	 *
+	 */
 	bool RebuidUI();
+
+	/**
+	 *
+	 */
+	void SetFullscreen(bool foolscreen);
+
+	/**
+	 *
+	 */
+	void ChangeResolution(int width, int height);
+
+	/**
+	 *
+	 */
+	void GetNextResolution(int currentW, int currentH, int *nextW, int *nextH, bool prev);
 
 private:
 	Game() :
@@ -36,6 +55,8 @@ private:
 
 	/* resources */
 	ResourceManager m_ResourceManager;
+
+	std::vector<SDL_DisplayMode> m_DisplayModes;
 
 	/**
 	 *

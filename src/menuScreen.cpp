@@ -5,8 +5,9 @@
 MenuScreen::MenuScreen()
 {
 	m_CurrentLayout = &Globals::menuLayout;
-	m_Demo.Initilaize(HandleEventsDemo, HandleCollisionsDemo,
-		RenderDemo, true, 60, 30, 10, true);
+	m_Demo.Initilaize(HandleEventsDemo, HandleCollisionsDemo, RenderDemo, true,
+		(uint32_t)(50 * (Globals::ASPECT_RATIO == ASPECT_RATIO_4_3 ? 1.33f : 1.78f)), 50,
+		30, 10, true);
 }
 
 void MenuScreen::Enter(GameEvent event)
@@ -49,4 +50,12 @@ void MenuScreen::Render(SDL_Renderer *renderer)
 {
 	m_Demo.Render(renderer);
 	m_CurrentLayout->Render(renderer);
+}
+
+void MenuScreen::Resize()
+{
+	m_Demo.Reconfigure((uint32_t)(50 * 
+		(Globals::ASPECT_RATIO == ASPECT_RATIO_4_3 ? 1.33f : 1.78f)),
+		50, true, 30, 10, true, false);
+	m_Demo.Reset();
 }

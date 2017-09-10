@@ -18,3 +18,5 @@ struct ColorScheme
 	ColorScheme *m_Head;
 	ColorScheme *m_NextScheme, *m_PrevScheme;
 };
+
+extern ColorScheme DEFAULT_COLOR_SCHEME;

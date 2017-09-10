@@ -1,4 +1,5 @@
 #pragma once
+#include "colorScheme.h"
 #include <SDL_ttf.h>
 
 class ResourceManager
@@ -21,7 +22,12 @@ public:
 
 private:
 	bool LoadFont();
+
 	bool LoadColorSchemes();
+	void AddColorScheme(ColorScheme *newScheme);
+	bool IsUniqueColorSchemeName(char *name);
+	void DestroyColorSchemes();
 
 	TTF_Font *m_Font;
+	ColorScheme *m_ColorSchemes;
 };

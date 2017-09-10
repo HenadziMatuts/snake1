@@ -90,7 +90,7 @@ InGameScreen::InGameScreen()
 {
 	m_CurrentLayout = &Globals::inGameLayout;
 	m_Field.Initilaize(HandleEventsInGame, HandleCollisionsInGame,
-				RenderInGame, false, Globals::GRID_DIMENSION,
+				RenderInGame, false, Globals::GRID_DIMENSION, Globals::GRID_DIMENSION,
 				Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS);
 }
 
@@ -154,10 +154,13 @@ GameEvent InGameScreen::Update(uint32_t elapsed)
 
 void InGameScreen::Render(SDL_Renderer *renderer)
 {
-	int scoreboardX = (m_Field.GeUpLeftCornOffset() * 2) + (m_Field.GetGridDimension() * m_Field.GetCellWidth());
-	int scoreboardY = m_Field.GeUpLeftCornOffset();
-	int scoreboardW = Globals::SCREEN_WIDTH - m_Field.GeUpLeftCornOffset() - scoreboardX;
-	int scoreboardH = Globals::SCREEN_HEIGHT - m_Field.GeUpLeftCornOffset();
+	int scoreboardX = (Globals::ASPECT_RATIO == ASPECT_RATIO_4_3) ?
+		30 + m_Field.GeUpLeftCornOffsetX() + 
+			(m_Field.GetGridDimensionX() * m_Field.GetCellWidth()) :
+		60;
+	int scoreboardY = m_Field.GeUpLeftCornOffsetY();
+	int scoreboardW = Globals::SCREEN_WIDTH - scoreboardX;
+	int scoreboardH = Globals::SCREEN_HEIGHT - m_Field.GeUpLeftCornOffsetY();
 	SDL_Rect r = { scoreboardX, scoreboardY, scoreboardW, scoreboardH };
 
 	m_Field.Render(renderer);
@@ -167,8 +170,15 @@ void InGameScreen::Render(SDL_Renderer *renderer)
 
 void InGameScreen::Restart()
 {
-	m_Field.Reconfigure(Globals::GRID_DIMENSION, false,
-		Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS);
+	m_Field.Reconfigure(Globals::GRID_DIMENSION, Globals::GRID_DIMENSION,
+		false, Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS, false);
+
 	m_Scoreboard.Reset();
 	m_Field.Reset();
+}
+
+void InGameScreen::Resize()
+{
+	m_Field.Reconfigure(Globals::GRID_DIMENSION, Globals::GRID_DIMENSION,
+		false, Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS, true);
 }

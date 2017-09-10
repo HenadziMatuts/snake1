@@ -14,69 +14,101 @@ GameField::~GameField()
 }
 
 void GameField::Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions, pfnRender render,
-					bool stretch, uint32_t gridDimension, int speed, int startBodySize, bool borderless)
+		bool stretch, uint32_t gridDimensionX, uint32_t gridDimensionY,
+		int speed, int startBodySize, bool borderless)
 {
 	m_HandleEvents = handleEvents;
 	m_HandleCollisions = handleCollisions;
 	m_Render = render;
-	if (m_GridDimension != gridDimension)
+	if (m_GridDimensionX != gridDimensionX
+		|| m_GridDimensionY != gridDimensionY)
 	{
-		Resize(gridDimension, stretch);
+		Resize(gridDimensionX, gridDimensionY, stretch, false);
 	}
 	m_GameSpeed = speed;
 	m_StartBodySize = startBodySize;
 	m_IsBorderless = borderless;
 }
 
-void GameField::Reconfigure(uint32_t gridDimension, bool stretch, int speed, int startBodySize, bool borderless)
+void GameField::Reconfigure(uint32_t gridDimensionX, uint32_t gridDimensionY,
+		bool stretch, int speed, int startBodySize, bool borderless, bool justResize)
 {
-	if (m_GridDimension != gridDimension)
+	if (m_GridDimensionX != gridDimensionX
+		|| m_GridDimensionY != gridDimensionY
+		|| justResize)
 	{
-		Resize(gridDimension, stretch);
+		Resize(gridDimensionX, gridDimensionY, stretch, justResize);
 	}
 	m_GameSpeed = speed;
 	m_StartBodySize = startBodySize;
 	m_IsBorderless = borderless;
 }
 
-void GameField::Resize(uint32_t gridDimension, bool stretch)
+void GameField::Resize(uint32_t gridDimensionX, uint32_t gridDimensionY, bool stretch, bool justResize)
 {
-	if (m_Grid)
+	if (!justResize)
 	{
-		delete[] m_Grid;
-		m_Grid = nullptr;
+		if (m_Grid)
+		{
+			delete[] m_Grid;
+			m_Grid = nullptr;
+		}
+
+		m_GridDimensionX = gridDimensionX;
+		m_GridDimensionY = gridDimensionY;
+
+		/* one dimensional array */
+		m_Grid = new FieldCell[m_GridDimensionX * m_GridDimensionY];
+		if (!m_Grid)
+		{
+			LOG_FATAL("%s: Memory allocation error!", __FUNCTION__);
+			CRASH(ExitCallback);
+		}
 	}
 
-	m_GridDimension = gridDimension;
-
-	/* one dimensional array */
-	m_Grid = new FieldCell[m_GridDimension * m_GridDimension];
-	if (!m_Grid)
-	{
-		LOG_FATAL("%s: Memory allocation error!", __FUNCTION__);
-		CRASH(ExitCallback);
-	}
-	
 	if (!stretch)
 	{
-		m_UpLeftCornOffset = 15;
-		m_CellWitdh = m_CellHeight = (Globals::SCREEN_HEIGHT - (m_UpLeftCornOffset * 2)) / m_GridDimension;
-		m_UpLeftCornOffset += ((Globals::SCREEN_HEIGHT - (m_UpLeftCornOffset * 2)) % m_GridDimension) / 2;
+		m_UpLeftCornOffsetY = 15;
+		
+		m_CellWitdh = m_CellHeight = (Globals::SCREEN_HEIGHT - (m_UpLeftCornOffsetY * 2)) / m_GridDimensionY;
+		m_UpLeftCornOffsetY += ((Globals::SCREEN_HEIGHT - (m_UpLeftCornOffsetY * 2)) % m_GridDimensionY) / 2;
+
+		int fieldW = Globals::SCREEN_HEIGHT - (m_UpLeftCornOffsetY * 2);
+
+		while ((int)(m_CellWitdh * m_GridDimensionX) > fieldW)
+		{
+			--m_CellWitdh;
+			--m_CellHeight;
+
+			m_UpLeftCornOffsetY += m_GridDimensionY / 2;
+		}
+
+		if (Globals::ASPECT_RATIO == ASPECT_RATIO_16_9)
+		{
+			m_UpLeftCornOffsetX = (Globals::SCREEN_WIDTH / 2) -
+				((m_CellWitdh * m_GridDimensionX) / 2);
+		}
+		else
+		{
+			m_UpLeftCornOffsetX = m_UpLeftCornOffsetY +
+				((m_CellHeight * m_GridDimensionY) / 2) -
+				((m_CellWitdh * m_GridDimensionX) / 2);
+		}
 	}
 	else
 	{
-		m_UpLeftCornOffset = 0;
-		m_CellWitdh = Globals::SCREEN_WIDTH / m_GridDimension;
-		m_CellWitdh += Globals::SCREEN_WIDTH % m_GridDimension ? 1 : 0;
+		m_UpLeftCornOffsetX = m_UpLeftCornOffsetY = 0;
+		m_CellWitdh = (Globals::SCREEN_WIDTH / m_GridDimensionX) +
+			((Globals::SCREEN_WIDTH % m_GridDimensionX) ? 1 : 0);
 
-		m_CellHeight = Globals::SCREEN_HEIGHT / m_GridDimension;
-		m_CellHeight += Globals::SCREEN_HEIGHT % m_GridDimension ? 1 : 0;
+		m_CellHeight = Globals::SCREEN_HEIGHT / m_GridDimensionY +
+			((Globals::SCREEN_HEIGHT % m_GridDimensionY) ? 1 : 0);
 	}
 
-	ClearField();
+	RecalculateField(justResize ? false : true);
 
-	m_FieldRect.w = m_CellWitdh * m_GridDimension;
-	m_FieldRect.h = m_CellHeight * m_GridDimension;
+	m_FieldRect.w = m_CellWitdh * m_GridDimensionX;
+	m_FieldRect.h = m_CellHeight * m_GridDimensionY;
 	m_FieldRect.x = m_Grid[0].m_Rect.x;
 	m_FieldRect.y = m_Grid[0].m_Rect.y;
 }
@@ -112,10 +144,10 @@ InGameEvent GameField::Update(uint32_t elapsed)
 			}
 
 			/* extinguish tail cell */
-			m_Grid[(m_GridDimension *  m_Snake.TailPosX()) + m_Snake.TailPosY()].m_State = CELL_STATE_EMPTY;
+			m_Grid[(m_GridDimensionY *  m_Snake.TailPosX()) + m_Snake.TailPosY()].m_State = CELL_STATE_EMPTY;
 
 			/* update snake position */
-			m_Snake.Update(m_GridDimension, m_GridDimension);
+			m_Snake.Update(m_GridDimensionX, m_GridDimensionY);
 			
 			/* handle collisions */
 			e = m_HandleCollisions(this);
@@ -137,14 +169,24 @@ int GameField::GetCellWidth()
 	return m_CellWitdh;
 }
 
-int GameField::GeUpLeftCornOffset()
+int GameField::GeUpLeftCornOffsetX()
 {
-	return m_UpLeftCornOffset;
+	return m_UpLeftCornOffsetX;
 }
 
-uint32_t GameField::GetGridDimension()
+int GameField::GeUpLeftCornOffsetY()
 {
-	return m_GridDimension;
+	return m_UpLeftCornOffsetY;
+}
+
+uint32_t GameField::GetGridDimensionX()
+{
+	return m_GridDimensionX;
+}
+
+uint32_t GameField::GetGridDimensionY()
+{
+	return m_GridDimensionY;
 }
 
 void GameField::Stop()
@@ -162,70 +204,73 @@ void GameField::Reset()
 	{
 		m_Food.Kill();
 	}
-	ClearField();
+	RecalculateField(true);
 }
 
 
 void GameField::SpawnSnake()
 {
-	m_Snake.Spawn(Utilities::Random(5, m_GridDimension - 5),
-		Utilities::Random(5, m_GridDimension - 5), Utilities::Random(-1, 1),
-		Utilities::Random(-1, 1), m_StartBodySize, m_GridDimension, m_GridDimension);
+	m_Snake.Spawn(Utilities::Random(5, m_GridDimensionX - 5),
+		Utilities::Random(5, m_GridDimensionY - 5), Utilities::Random(-1, 1),
+		Utilities::Random(-1, 1), m_StartBodySize, m_GridDimensionX, m_GridDimensionY);
 
 	int headPosX = m_Snake.HeadPosX(), headPosY = m_Snake.HeadPosY();
 	int tailPosX = m_Snake.TailPosX(), tailPosY = m_Snake.TailPosY();
 	int dirX = m_Snake.DirX(), dirY = m_Snake.DirY();
 	int bodySize = m_Snake.BodySize();
 
-	m_Grid[(m_GridDimension * headPosX) + headPosY].m_State = CELL_STATE_SNAKE;
+	m_Grid[(m_GridDimensionY * headPosX) + headPosY].m_State = CELL_STATE_SNAKE;
 
 	if (dirX)
 	{
 		for (int i = 1; i < bodySize; i++)
 		{
-			unsigned int x = Utilities::ModuloSum(headPosX, -1 * i * dirX, m_GridDimension);
-			m_Grid[(m_GridDimension * x) + headPosY].m_State = CELL_STATE_SNAKE;
+			unsigned int x = Utilities::ModuloSum(headPosX, -1 * i * dirX, m_GridDimensionX);
+			m_Grid[(m_GridDimensionY * x) + headPosY].m_State = CELL_STATE_SNAKE;
 		}
 	}
 	else if (dirY)
 	{
 		for (int i = 1; i < bodySize; i++)
 		{
-			unsigned int y = Utilities::ModuloSum(headPosY, -1 * i * dirY, m_GridDimension);
-			m_Grid[(m_GridDimension * headPosX) + y].m_State = CELL_STATE_SNAKE;
+			unsigned int y = Utilities::ModuloSum(headPosY, -1 * i * dirY, m_GridDimensionY);
+			m_Grid[(m_GridDimensionY * headPosX) + y].m_State = CELL_STATE_SNAKE;
 		}
 	}
 
-	m_Grid[(m_GridDimension * tailPosX) + tailPosY].m_State = CELL_STATE_SNAKE;
+	m_Grid[(m_GridDimensionY * tailPosX) + tailPosY].m_State = CELL_STATE_SNAKE;
 }
 
 void GameField::SpawnFood()
 {
-	m_Food.Spawn(Utilities::Random(0, m_GridDimension - 1),
-		Utilities::Random(0, m_GridDimension - 1));
+	m_Food.Spawn(Utilities::Random(0, m_GridDimensionX - 1),
+		Utilities::Random(0, m_GridDimensionY - 1));
 
-	while (m_Grid[(m_GridDimension * m_Food.PosX()) + m_Food.PosY()].m_State != CELL_STATE_EMPTY
+	while (m_Grid[(m_GridDimensionY * m_Food.PosX()) + m_Food.PosY()].m_State != CELL_STATE_EMPTY
 		|| (m_Food.PosX() == m_Snake.TailPosX() && m_Food.PosY() == m_Snake.TailPosY()))
 	{
-		m_Food.Respawn(Utilities::Random(0, m_GridDimension - 1),
-			Utilities::Random(0, m_GridDimension - 1));
+		m_Food.Respawn(Utilities::Random(0, m_GridDimensionX - 1),
+			Utilities::Random(0, m_GridDimensionY - 1));
 	}
 
-	m_Grid[(m_GridDimension * m_Food.PosX()) + m_Food.PosY()].m_State = CELL_STATE_FOOD;
+	m_Grid[(m_GridDimensionY * m_Food.PosX()) + m_Food.PosY()].m_State = CELL_STATE_FOOD;
 }
 
-void GameField::ClearField()
+void GameField::RecalculateField(bool clear)
 {
-	for (uint32_t i = 0; i < m_GridDimension; i++)
+	for (uint32_t i = 0; i < m_GridDimensionX; i++)
 	{
-		uint32_t row = m_GridDimension * i;
-		for (uint32_t j = 0; j < m_GridDimension; j++)
+		uint32_t row = m_GridDimensionY * i;
+		for (uint32_t j = 0; j < m_GridDimensionY; j++)
 		{
 			m_Grid[row + j].m_Rect.w = m_CellWitdh;
 			m_Grid[row + j].m_Rect.h = m_CellHeight;
-			m_Grid[row + j].m_Rect.x = m_UpLeftCornOffset + (m_CellWitdh * i);
-			m_Grid[row + j].m_Rect.y = m_UpLeftCornOffset + (m_CellHeight * j);
-			m_Grid[row + j].m_State = CELL_STATE_EMPTY;
+			m_Grid[row + j].m_Rect.x = m_UpLeftCornOffsetX + (m_CellWitdh * i);
+			m_Grid[row + j].m_Rect.y = m_UpLeftCornOffsetY + (m_CellHeight * j);
+			if (clear)
+			{
+				m_Grid[row + j].m_State = CELL_STATE_EMPTY;
+			}
 		}
 	}
 }
@@ -238,8 +283,8 @@ void HandleEventsInGame(GameField *_this, SDL_Event *event)
 
 InGameEvent HandleCollisionsInGame(GameField *_this)
 {
-	uint32_t headCellIndex = (_this->m_GridDimension * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
-	uint32_t tailCellIndex = (_this->m_GridDimension * _this->m_Snake.TailPosX()) + _this->m_Snake.TailPosY();
+	uint32_t headCellIndex = (_this->m_GridDimensionY * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
+	uint32_t tailCellIndex = (_this->m_GridDimensionY * _this->m_Snake.TailPosX()) + _this->m_Snake.TailPosY();
 
 	if (!_this->m_IsBorderless && _this->m_Snake.IsCrossedTheBound())
 	{
@@ -261,7 +306,7 @@ InGameEvent HandleCollisionsInGame(GameField *_this)
 			_this->m_Food.Kill();
 			_this->m_Grid[headCellIndex].m_State = CELL_STATE_SNAKE;
 			
-			_this->m_Snake.Grow(_this->m_GridDimension, _this->m_GridDimension);
+			_this->m_Snake.Grow(_this->m_GridDimensionX, _this->m_GridDimensionY);
 			if (!_this->m_IsBorderless && _this->m_Snake.IsCrossedTheBound())
 			{
 				_this->m_Snake.Stop();
@@ -277,8 +322,8 @@ InGameEvent HandleCollisionsInGame(GameField *_this)
 
 void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 {
-	uint32_t headCellIndex = (_this->m_GridDimension * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
-	uint32_t tailCellIndex = (_this->m_GridDimension * _this->m_Snake.TailPosX()) + _this->m_Snake.TailPosY();
+	uint32_t headCellIndex = (_this->m_GridDimensionY * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
+	uint32_t tailCellIndex = (_this->m_GridDimensionY * _this->m_Snake.TailPosX()) + _this->m_Snake.TailPosY();
 
 	SDL_Color borderc = Globals::COLOR_SCHEME->m_Border;
 	SDL_Color emptyc = Globals::COLOR_SCHEME->m_CellEmpty;
@@ -288,10 +333,12 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 	if (!_this->m_IsBorderless)
 	{
 		SDL_Rect r = _this->m_FieldRect;
-		r.x -= _this->m_UpLeftCornOffset / 2;
-		r.y -= _this->m_UpLeftCornOffset / 2;
-		r.w += _this->m_UpLeftCornOffset;
-		r.h += _this->m_UpLeftCornOffset;
+		int offset = (_this->m_UpLeftCornOffsetX <= _this->m_UpLeftCornOffsetY) ?
+			_this->m_UpLeftCornOffsetX : _this->m_UpLeftCornOffsetY;
+		r.x -= offset / 2;
+		r.y -= offset / 2;
+		r.w += offset;
+		r.h += offset;
 		SDL_SetRenderDrawColor(renderer, borderc.r, borderc.g, borderc.b, borderc.a);
 		SDL_RenderFillRect(renderer, &r);
 	}
@@ -299,10 +346,10 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 	SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 	SDL_RenderFillRect(renderer, &_this->m_FieldRect);
 
-	for (uint32_t i = 0; i < _this->m_GridDimension; i++)
+	for (uint32_t i = 0; i < _this->m_GridDimensionX; i++)
 	{
-		uint32_t row = _this->m_GridDimension * i;
-		for (uint32_t j = 0; j < _this->m_GridDimension; j++)
+		uint32_t row = _this->m_GridDimensionY * i;
+		for (uint32_t j = 0; j < _this->m_GridDimensionY; j++)
 		{
 			switch (_this->m_Grid[row + j].m_State)
 			{
@@ -390,9 +437,9 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 		if (_this->m_Snake.Growing() == GROWING_STEP_1)
 		{
 			int bodySize = _this->m_Snake.BodySize();
-			int penultSegmentPosX = _this->m_Snake.SegmentPosX(bodySize - 1, _this->m_GridDimension);
-			int penultSegmentPosY = _this->m_Snake.SegmentPosY(bodySize - 1, _this->m_GridDimension);
-			uint32_t penultSegmentCellIndex = (_this->m_GridDimension * penultSegmentPosX) + penultSegmentPosY;
+			int penultSegmentPosX = _this->m_Snake.SegmentPosX(bodySize - 1, _this->m_GridDimensionX);
+			int penultSegmentPosY = _this->m_Snake.SegmentPosY(bodySize - 1, _this->m_GridDimensionY);
+			uint32_t penultSegmentCellIndex = (_this->m_GridDimensionY * penultSegmentPosX) + penultSegmentPosY;
 
 			SDL_SetRenderDrawColor(renderer, emptyc.r, emptyc.g, emptyc.b, emptyc.a);
 			SDL_RenderFillRect(renderer, &_this->m_Grid[penultSegmentCellIndex].m_Rect);
@@ -461,7 +508,7 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 			
 			if (_this->m_Snake.Growing() == GROWING_FINISHED)
 			{
-				tailCellIndex -= _this->m_GridDimension * _this->m_Snake.TailDirX();
+				tailCellIndex -= _this->m_GridDimensionX * _this->m_Snake.TailDirX();
 				tailCellIndex -= _this->m_Snake.TailDirY();
 				SDL_SetRenderDrawColor(renderer, snakec.r, snakec.g, snakec.b, snakec.a);
 				SDL_RenderFillRect(renderer, &_this->m_Grid[tailCellIndex].m_Rect);
@@ -477,7 +524,7 @@ void HandleEventsDemo(GameField *_this, SDL_Event *event)
 
 InGameEvent HandleCollisionsDemo(GameField *_this)
 {
-	uint32_t headCellIndex = (_this->m_GridDimension * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
+	uint32_t headCellIndex = (_this->m_GridDimensionY * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY();
 
 	switch (_this->m_Grid[headCellIndex].m_State)
 	{
@@ -486,9 +533,9 @@ InGameEvent HandleCollisionsDemo(GameField *_this)
 			/* looking for a food */
 			if (_this->m_Snake.DirX())
 			{
-				for (int i = 0; i < (int)_this->m_GridDimension; i++)
+				for (int i = 0; i < (int)_this->m_GridDimensionY; i++)
 				{
-					if (_this->m_Grid[(_this->m_GridDimension * _this->m_Snake.HeadPosX()) + i].m_State == CELL_STATE_FOOD)
+					if (_this->m_Grid[(_this->m_GridDimensionY * _this->m_Snake.HeadPosX()) + i].m_State == CELL_STATE_FOOD)
 					{
 						_this->m_Snake.ChangeDirection(0, i < _this->m_Snake.HeadPosY() ? -1 : 1);
 					}
@@ -496,9 +543,9 @@ InGameEvent HandleCollisionsDemo(GameField *_this)
 			}
 			else if (_this->m_Snake.DirY())
 			{
-				for (int i = 0; i < (int)_this->m_GridDimension; i++)
+				for (int i = 0; i < (int)_this->m_GridDimensionX; i++)
 				{
-					if (_this->m_Grid[(i * _this->m_GridDimension) + _this->m_Snake.HeadPosY()].m_State == CELL_STATE_FOOD)
+					if (_this->m_Grid[(i * _this->m_GridDimensionY) + _this->m_Snake.HeadPosY()].m_State == CELL_STATE_FOOD)
 					{
 						_this->m_Snake.ChangeDirection(i < _this->m_Snake.HeadPosX() ? -1 : 1, 0);
 					}
@@ -514,8 +561,8 @@ InGameEvent HandleCollisionsDemo(GameField *_this)
 			_this->m_Food.Kill();
 			_this->m_Grid[headCellIndex].m_State = CELL_STATE_SNAKE;
 			
-			_this->m_Snake.Grow(_this->m_GridDimension, _this->m_GridDimension);
-			_this->m_Grid[(_this->m_GridDimension * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY()].m_State = CELL_STATE_SNAKE;
+			_this->m_Snake.Grow(_this->m_GridDimensionX, _this->m_GridDimensionY);
+			_this->m_Grid[(_this->m_GridDimensionY * _this->m_Snake.HeadPosX()) + _this->m_Snake.HeadPosY()].m_State = CELL_STATE_SNAKE;
 			
 			break;
 	}
@@ -528,10 +575,10 @@ void RenderDemo(GameField *_this, SDL_Renderer *renderer)
 	SDL_Color democ = Globals::COLOR_SCHEME->m_CellDemo;
 
 	SDL_SetRenderDrawColor(renderer, democ.r, democ.g, democ.b, democ.a);
-	for (uint32_t i = 0; i < _this->m_GridDimension; i++)
+	for (uint32_t i = 0; i < _this->m_GridDimensionX; i++)
 	{
-		uint32_t row = _this->m_GridDimension * i;
-		for (uint32_t j = 0; j < _this->m_GridDimension; j++)
+		uint32_t row = _this->m_GridDimensionY * i;
+		for (uint32_t j = 0; j < _this->m_GridDimensionY; j++)
 		{
 			switch (_this->m_Grid[row + j].m_State)
 			{

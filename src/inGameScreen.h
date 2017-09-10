@@ -57,6 +57,8 @@ public:
 	GameEvent Update(uint32_t elapsed);
 	void Render(SDL_Renderer *renderer);
 
+	void Resize();
+
 private:
 	/* UI */
 	UILayout *m_CurrentLayout;

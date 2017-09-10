@@ -5,6 +5,22 @@
 const char *PATH_FONT = "assets\\FFFFORWA.TTF";
 const char *PATH_COLOR_SCHEME = "assets\\colorScheme.ini";
 
+ColorScheme DEFAULT_COLOR_SCHEME = {
+	"classic grey",
+	{ 0xE0, 0xE0, 0xE0, 0xFF },
+	{ 0x00, 0x00, 0x00, 0xFF },
+	{ 0x90, 0x90, 0x90, 0x80 },
+	{ 0xC0, 0xC0, 0xC0, 0xF0 },
+	{ 0xA0, 0xA0, 0xA0, 0xFF },
+	{ 0x00, 0x00, 0x00, 0xFF },
+	{ 0xFF, 0xFF, 0xFF, 0xFF },
+	{ 0xA0, 0xA0, 0xA0, 0xFF },
+	{ 0x80, 0x80, 0x80, 0xFF },
+	&DEFAULT_COLOR_SCHEME,
+	&DEFAULT_COLOR_SCHEME,
+	&DEFAULT_COLOR_SCHEME
+};
+
 bool ResourceManager::LoadResources()
 {
 	/* load font */
@@ -25,7 +41,8 @@ bool ResourceManager::LoadResources()
 void ResourceManager::UnloadResources()
 {
 	TTF_CloseFont(m_Font);
-	Globals::DestroyColorSchemes();
+
+	DestroyColorSchemes();
 }
 
 TTF_Font* ResourceManager::GetFont()
@@ -66,6 +83,9 @@ static char *colorSchemeIniKeys[COLOR_SCHEME_KEY_TOTAL] =
 
 bool ResourceManager::LoadColorSchemes()
 {
+	/* default color scheme allocated on stack */
+	m_ColorSchemes = &DEFAULT_COLOR_SCHEME;
+
 	size_t bufferSize = 256, ret = 0;
 	bool isBigEndian = Utilities::IsBigEndian();
 
@@ -113,7 +133,7 @@ bool ResourceManager::LoadColorSchemes()
 			continue;
 		}
 
-		if (!Globals::IsUniqueColorSchemeName(p))
+		if (!IsUniqueColorSchemeName(p))
 		{
 			LOG_WARN("Skipping \"%s\" section, such scheme already exists", p);
 			p += l + 1;
@@ -210,12 +230,63 @@ bool ResourceManager::LoadColorSchemes()
 			continue;
 		}
 		
-		Globals::AddColorScheme(newScheme);
+		AddColorScheme(newScheme);
 
 		p += l + 1;
 	}
 
 	free(names);
-
 	return true;
+}
+
+void ResourceManager::AddColorScheme(ColorScheme *newScheme)
+{
+	ColorScheme *curr = m_ColorSchemes;
+	ColorScheme *head = m_ColorSchemes->m_Head;
+
+	while (curr->m_NextScheme != head)
+	{
+		curr = curr->m_NextScheme;
+	}
+
+	curr->m_NextScheme = newScheme;
+	head->m_PrevScheme = newScheme;
+
+	newScheme->m_PrevScheme = curr;
+	newScheme->m_NextScheme =
+		newScheme->m_Head = head;
+}
+
+bool ResourceManager::IsUniqueColorSchemeName(char *name)
+{
+	ColorScheme *curr = m_ColorSchemes->m_Head;
+
+	do
+	{
+		if (!strcmp(curr->m_Name, name))
+		{
+			return false;
+		}
+
+		curr = curr->m_NextScheme;
+
+	} while (curr->m_NextScheme != curr->m_Head);
+
+	return strcmp(curr->m_Name, name) ? true : false;
+}
+
+void ResourceManager::DestroyColorSchemes()
+{
+	ColorScheme *head = m_ColorSchemes->m_Head;
+	ColorScheme *curr = head->m_NextScheme;
+
+	while (curr->m_NextScheme != head)
+	{
+		curr = curr->m_NextScheme;
+		delete curr->m_PrevScheme;
+		curr->m_PrevScheme = nullptr;
+	}
+
+	delete curr;
+	curr = nullptr;
 }
