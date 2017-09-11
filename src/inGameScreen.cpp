@@ -126,17 +126,24 @@ GameScreen* InGameScreen::HandleEvents(SDL_Event *event)
 
 GameEvent InGameScreen::Update(uint32_t elapsed)
 {
-	switch (m_Field.Update(elapsed))
+	m_Field.Update(elapsed, &m_EventQueue);
+
+	for (size_t i = 0; m_EventQueue.size(); i++)
 	{
-		case INGAME_EVENT_SNAKE_DIED:
-			m_Scoreboard.Stop();
-			Globals::inGameLayout.SnakeDied(m_Scoreboard.Score());
-			break;
-		case INGAME_EVENT_SNAKE_GROWN:
-			m_Scoreboard.Increment();
-			break;
-		default:
-			break;
+		switch (m_EventQueue.front())
+		{
+			case INGAME_EVENT_SNAKE_DIED:
+				m_Scoreboard.Stop();
+				Globals::inGameLayout.SnakeDied(m_Scoreboard.Score());
+				break;
+			case INGAME_EVENT_SNAKE_GROWN:
+				m_Scoreboard.Increment();
+				break;
+			default:
+				break;
+		}
+
+		m_EventQueue.pop();
 	}
 
 	switch (m_Scoreboard.Update(elapsed))

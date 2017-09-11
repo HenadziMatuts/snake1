@@ -6,6 +6,7 @@
 #include "snake.h"
 #include <cstdio>
 #include <cstdint>
+#include <queue>
 
 class Scoreboard
 {
@@ -68,5 +69,7 @@ private:
 	/* scoreboard */
 	Scoreboard m_Scoreboard;
 	
+	std::queue<InGameEvent> m_EventQueue;
+
 	void Restart();
 };

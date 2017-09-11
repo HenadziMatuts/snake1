@@ -1,6 +1,7 @@
 #include "menuScreen.h"
 #include "utilities.h"
 #include "globals.h"
+#include <queue>
 
 MenuScreen::MenuScreen()
 {
@@ -42,7 +43,9 @@ GameScreen* MenuScreen::HandleEvents(SDL_Event *event)
 
 GameEvent MenuScreen::Update(uint32_t elapsed)
 {
-	m_Demo.Update(elapsed);
+	std::queue<InGameEvent> events;
+	m_Demo.Update(elapsed, &events);
+
 	return m_CurrentLayout->Update(elapsed);
 }
 

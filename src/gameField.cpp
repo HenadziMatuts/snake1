@@ -118,10 +118,10 @@ void GameField::HandleEvents(SDL_Event *event)
 	m_HandleEvents(this, event);
 }
 
-InGameEvent GameField::Update(uint32_t elapsed)
+//InGameEvent GameField::Update(uint32_t elapsed)
+void GameField::Update(uint32_t elapsed, std::queue<InGameEvent> *events)
 {
 	bool ret = false;
-	InGameEvent e = INGAME_EVENT_NOTHING_HAPPENS;
 	m_Elapsed += elapsed;
 
 	if (!m_Snake.IsAlive())
@@ -150,13 +150,11 @@ InGameEvent GameField::Update(uint32_t elapsed)
 			m_Snake.Update(m_GridDimensionX, m_GridDimensionY);
 			
 			/* handle collisions */
-			e = m_HandleCollisions(this);
+			events->push(m_HandleCollisions(this));
 
 			m_Elapsed -= upd;
 		}
 	}
-
-	return e;
 }
 
 void GameField::Render(SDL_Renderer *renderer)

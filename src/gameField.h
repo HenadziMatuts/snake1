@@ -3,6 +3,7 @@
 #include "food.h"
 #include <SDL.h>
 #include <cstdint>
+#include <queue>
 
 enum InGameEvent
 {
@@ -55,7 +56,7 @@ public:
 	void Resize(uint32_t gridDimensionX, uint32_t gridDimensionY, bool stretch, bool justResize);
 
 	void HandleEvents(SDL_Event *event);
-	InGameEvent Update(uint32_t elapsed);
+	void Update(uint32_t elapsed, std::queue<InGameEvent> *events);
 	void Render(SDL_Renderer *renderer);
 
 	int GetCellWidth();
@@ -75,6 +76,8 @@ public:
 	friend void HandleEventsDemo(GameField *_this, SDL_Event *event);
 	friend InGameEvent HandleCollisionsDemo(GameField *_this);
 	friend void RenderDemo(GameField *_this, SDL_Renderer *renderer);
+	
+	uint32_t m_Elapsed;
 
 private:
 	/* implementation */
@@ -95,7 +98,7 @@ private:
 
 	/* game speed */
 	int m_GameSpeed;
-	uint32_t m_Elapsed;
+	//uint32_t m_Elapsed;
 
 	int m_StartBodySize;
 
