@@ -20,6 +20,11 @@ ResourceManager& Game::Resources()
 	return m_ResourceManager;
 }
 
+EventBus& Game::Events()
+{
+	return m_EventBus;
+}
+
 void Game::Initialize()
 {
 	LOG_INFO("Initializing SDL...");
@@ -127,30 +132,38 @@ int Game::Run()
 		{
 			switch (event.type)
 			{
-			case SDL_QUIT:
-				quit = true;
-				break;
+				case SDL_QUIT:
+					quit = true;
+					break;
 
-			default:
-				newScreen = currentScreen->HandleEvents(&event);
-				if (newScreen)
-				{
-					currentScreen = newScreen;
-				}
-				break;
+				default:
+					newScreen = currentScreen->HandleEvents(&event);
+					if (newScreen)
+					{
+						currentScreen = newScreen;
+					}
+					break;
 			}
 		}
 
 		/* update state */
-		switch (currentScreen->Update(elapsed))
-		{
-			case GAME_EVENT_QUIT:
-				quit = true;
-				break;
+		currentScreen->Update(elapsed);
 
-			default:
-				break;
+		/* handling events */
+		std::vector<GameEvent> *gameEvents = m_EventBus.GameEvents();
+		size_t n = gameEvents->size();
+
+		for (size_t i = 0; i < n; i++)
+		{
+			switch ((*gameEvents)[i])
+			{
+				case GAME_EVENT_QUIT:
+					quit = true;
+					break;
+			}
 		}
+
+		m_EventBus.ClearEvents();
 
 		/* render */
 		Render(currentScreen);
@@ -184,7 +197,7 @@ void Game::SetFullscreen(bool fullscreen)
 	RebuidUI();
 }
 
-void Game::ChangeResolution(int width, int height)
+void Game::ChangeResolution(int width, int height, bool fullscreen)
 {
 	size_t index = 0;
 
@@ -197,7 +210,10 @@ void Game::ChangeResolution(int width, int height)
 		}
 	}
 
-	SDL_SetWindowDisplayMode(m_Window, &m_DisplayModes[index]);
+	if (fullscreen)
+	{
+		SDL_SetWindowDisplayMode(m_Window, &m_DisplayModes[index]);
+	}
 	SDL_SetWindowSize(m_Window, m_DisplayModes[index].w, m_DisplayModes[index].h);
 
 	RebuidUI();

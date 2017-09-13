@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\eventBus.cpp" />
     <ClCompile Include="..\src\food.cpp" />
     <ClCompile Include="..\src\game.cpp" />
     <ClCompile Include="..\src\gameField.cpp" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\colorScheme.h" />
+    <ClInclude Include="..\src\eventBus.h" />
     <ClInclude Include="..\src\food.h" />
     <ClInclude Include="..\src\game.h" />
     <ClInclude Include="..\src\gameField.h" />

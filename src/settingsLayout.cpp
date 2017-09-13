@@ -121,23 +121,23 @@ static UILayout* SettingApplyButtonEventHandler(SDL_Event *event, GameScreen **n
 		{
 			case SDLK_RETURN:
 			case SDLK_SPACE:
-				if (Globals::FULLSCREEN != settings->m_Fullscreen)
-				{
-					Globals::FULLSCREEN = settings->m_Fullscreen;
-					Game::Instance().SetFullscreen(Globals::FULLSCREEN);
-
-					break;
-				}
 				if ((Globals::SCREEN_WIDTH != settings->m_ResolutionWidth)
 					|| (Globals::SCREEN_HEIGHT != settings->m_ResolutionHeight))
 				{
 					Globals::SCREEN_WIDTH = settings->m_ResolutionWidth;
 					Globals::SCREEN_HEIGHT = settings->m_ResolutionHeight;
-					Game::Instance().ChangeResolution(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT);
+					Game::Instance().ChangeResolution(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT, settings->m_Fullscreen);
 
 					Globals::menuScreen.Resize();
 					Globals::inGameScreen.Resize();
-					break;
+				}
+				if (Globals::FULLSCREEN != settings->m_Fullscreen)
+				{
+					Globals::FULLSCREEN = settings->m_Fullscreen;
+					Game::Instance().SetFullscreen(Globals::FULLSCREEN);
+
+					Globals::menuScreen.Resize();
+					Globals::inGameScreen.Resize();
 				}
 
 				break;

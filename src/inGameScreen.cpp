@@ -124,7 +124,7 @@ GameScreen* InGameScreen::HandleEvents(SDL_Event *event)
 	return nullptr;
 }
 
-GameEvent InGameScreen::Update(uint32_t elapsed)
+void InGameScreen::Update(uint32_t elapsed)
 {
 	m_Field.Update(elapsed, &m_EventQueue);
 
@@ -156,7 +156,7 @@ GameEvent InGameScreen::Update(uint32_t elapsed)
 			break;
 	}
 
-	return m_CurrentLayout->Update(elapsed);
+	m_CurrentLayout->Update(elapsed);
 }
 
 void InGameScreen::Render(SDL_Renderer *renderer)

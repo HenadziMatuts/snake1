@@ -1,6 +1,7 @@
 #pragma once
 #include "resourceManager.h"
 #include "gameScreen.h"
+#include "eventBus.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <vector>
@@ -12,6 +13,7 @@ class Game {
 public:
 	static Game& Instance();
 	ResourceManager& Resources();
+	EventBus& Events();
 
 	/**
 	 * Initialize subsystems.
@@ -31,12 +33,12 @@ public:
 	/**
 	 *
 	 */
-	void SetFullscreen(bool foolscreen);
+	void SetFullscreen(bool fullscreen);
 
 	/**
 	 *
 	 */
-	void ChangeResolution(int width, int height);
+	void ChangeResolution(int width, int height, bool fullscreen);
 
 	/**
 	 *
@@ -52,11 +54,13 @@ private:
 	/* rendering subsystem */
 	SDL_Window *m_Window;
 	SDL_Renderer *m_Renderer;
+	std::vector<SDL_DisplayMode> m_DisplayModes;
 
 	/* resources */
 	ResourceManager m_ResourceManager;
 
-	std::vector<SDL_DisplayMode> m_DisplayModes;
+	/* event bus */
+	EventBus m_EventBus;
 
 	/**
 	 *

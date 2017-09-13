@@ -55,7 +55,7 @@ public:
 
 	void Enter(GameEvent event);
 	GameScreen* HandleEvents(SDL_Event *event);
-	GameEvent Update(uint32_t elapsed);
+	void Update(uint32_t elapsed);
 	void Render(SDL_Renderer *renderer);
 
 	void Resize();

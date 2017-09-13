@@ -30,6 +30,6 @@ public:
 
 	virtual void Enter(GameEvent event) = 0;
 	virtual GameScreen* HandleEvents(SDL_Event *event) = 0;
-	virtual GameEvent Update(uint32_t elapsed) = 0;
+	virtual void Update(uint32_t elapsed) = 0;
 	virtual void Render(SDL_Renderer *renderer) = 0;
 };

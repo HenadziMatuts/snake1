@@ -40,9 +40,9 @@ GameEvent MenuLayout::Update(uint32_t elapsed)
 {
 	if (m_Quit)
 	{
-		return GAME_EVENT_QUIT;
+		Game::Instance().Events().PostGameEvent(GAME_EVENT_QUIT);
 	}
-
+	
 	/* animating invites */
 	if ((m_Timer += elapsed) >= 750)
 	{

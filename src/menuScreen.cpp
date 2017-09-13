@@ -41,12 +41,12 @@ GameScreen* MenuScreen::HandleEvents(SDL_Event *event)
 	return newScreen;
 }
 
-GameEvent MenuScreen::Update(uint32_t elapsed)
+void MenuScreen::Update(uint32_t elapsed)
 {
 	std::queue<InGameEvent> events;
 	m_Demo.Update(elapsed, &events);
 
-	return m_CurrentLayout->Update(elapsed);
+	m_CurrentLayout->Update(elapsed);
 }
 
 void MenuScreen::Render(SDL_Renderer *renderer)
