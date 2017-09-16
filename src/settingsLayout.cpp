@@ -160,7 +160,7 @@ void SettingsLayout::Enter()
 	m_UIButton[m_SelectedButton].Select(true);
 }
 
-UILayout* SettingsLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
+UILayout* SettingsLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 {
 	UILayout *newLayout = nullptr;
 	if (event->type == SDL_KEYUP)
@@ -202,7 +202,7 @@ UILayout* SettingsLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
 					}
 				}
 			default:
-				newLayout = m_UIButton[m_SelectedButton].HandleEvents(event, newScreen, (void*)&m_Settings);
+				newLayout = m_UIButton[m_SelectedButton].HandleInput(event, newScreen, (void*)&m_Settings);
 				if (m_SelectedButton == SETTINGS_UI_BUTTON_APPLY)
 				{
 					m_UIButton[m_SelectedButton].SetVisibility(false);

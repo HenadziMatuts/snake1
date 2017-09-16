@@ -7,7 +7,7 @@ class UILayout
 public:
 	virtual ~UILayout() {};
 
-	virtual UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen) = 0;
+	virtual UILayout* HandleInput(SDL_Event *event, GameScreen **newScreen) = 0;
 	virtual GameEvent Update(uint32_t elapsed) = 0;
 	virtual void Render(SDL_Renderer *renderer) = 0;
 

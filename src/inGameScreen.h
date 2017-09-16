@@ -23,7 +23,7 @@ public:
 	};
 
 	void Render(SDL_Renderer *renderer, SDL_Rect *viewport);
-	InGameEvent Update(uint32_t elapsed);
+	void Update(uint32_t elapsed, EventBus *eventBus);
 
 	void Reset();
 	void Increment();
@@ -54,8 +54,8 @@ public:
 	InGameScreen();
 
 	void Enter(GameEvent event);
-	GameScreen* HandleEvents(SDL_Event *event);
-	void Update(uint32_t elapsed);
+	GameScreen* HandleInput(SDL_Event *event);
+	void Update(uint32_t elapsed, EventBus *eventBus);
 	void Render(SDL_Renderer *renderer);
 
 	void Resize();
@@ -68,8 +68,6 @@ private:
 	GameField m_Field;
 	/* scoreboard */
 	Scoreboard m_Scoreboard;
-	
-	std::queue<InGameEvent> m_EventQueue;
 
 	void Restart();
 };

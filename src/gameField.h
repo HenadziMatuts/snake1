@@ -1,16 +1,10 @@
 #pragma once
 #include "snake.h"
 #include "food.h"
+#include "eventBus.h"
 #include <SDL.h>
 #include <cstdint>
 #include <queue>
-
-enum InGameEvent
-{
-	INGAME_EVENT_NOTHING_HAPPENS = 0,
-	INGAME_EVENT_SNAKE_DIED,
-	INGAME_EVENT_SNAKE_GROWN,
-};
 
 enum CellState
 {
@@ -28,7 +22,7 @@ struct FieldCell {
 
 class GameField;
 
-typedef void (*pfnHandleEvents)(GameField *_this, SDL_Event *event);
+typedef void (*pfnHandleInput)(GameField *_this, SDL_Event *event);
 typedef InGameEvent (*pfnHandleCollisions)(GameField *_this);
 typedef void (*pfnRender)(GameField *_this, SDL_Renderer *renderer);
 
@@ -44,19 +38,20 @@ public:
 		m_GameSpeed(30),
 		m_Elapsed(0),
 		m_StartBodySize(10),
-		m_IsBorderless(true)
+		m_IsBorderless(true),
+		m_ShouldStop(false)
 	{};
 	~GameField();
 
-	void Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions, pfnRender render,
+	void Initilaize(pfnHandleInput HandleInput, pfnHandleCollisions handleCollisions, pfnRender render,
 			bool stretch, uint32_t gridDimensionX, uint32_t gridDimensionY,
 			int speed, int startBodySize, bool borderless);
 	void Reconfigure(uint32_t gridDimensionX, uint32_t gridDimensionY,
 			bool stretch, int speed, int startBodySize, bool borderless, bool justResize);
 	void Resize(uint32_t gridDimensionX, uint32_t gridDimensionY, bool stretch, bool justResize);
 
-	void HandleEvents(SDL_Event *event);
-	void Update(uint32_t elapsed, std::queue<InGameEvent> *events);
+	void HandleInput(SDL_Event *event);
+	void Update(uint32_t elapsed, EventBus *eventBus);
 	void Render(SDL_Renderer *renderer);
 
 	int GetCellWidth();
@@ -69,11 +64,11 @@ public:
 	void Reset();
 
 	/**/
-	friend void HandleEventsInGame(GameField *_this, SDL_Event *event);
+	friend void HandleInputInGame(GameField *_this, SDL_Event *event);
 	friend InGameEvent HandleCollisionsInGame(GameField *_this);
 	friend void RenderInGame(GameField *_this, SDL_Renderer *renderer);
 
-	friend void HandleEventsDemo(GameField *_this, SDL_Event *event);
+	friend void HandleInputDemo(GameField *_this, SDL_Event *event);
 	friend InGameEvent HandleCollisionsDemo(GameField *_this);
 	friend void RenderDemo(GameField *_this, SDL_Renderer *renderer);
 	
@@ -81,7 +76,7 @@ public:
 
 private:
 	/* implementation */
-	pfnHandleEvents m_HandleEvents;
+	pfnHandleInput m_HandleInput;
 	pfnHandleCollisions m_HandleCollisions;
 	pfnRender m_Render;
 
@@ -98,11 +93,12 @@ private:
 
 	/* game speed */
 	int m_GameSpeed;
-	//uint32_t m_Elapsed;
-
+	
 	int m_StartBodySize;
 
 	bool m_IsBorderless;
+
+	bool m_ShouldStop;
 
 	/* snake instance */
 	Snake m_Snake;

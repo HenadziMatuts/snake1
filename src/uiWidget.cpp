@@ -127,7 +127,7 @@ void UILabel::SetText(char *text, TTF_Font *font)
 	}
 }
 
-UILayout* UILabel::HandleEvents(SDL_Event *event, GameScreen **newScreen, void *userData)
+UILayout* UILabel::HandleInput(SDL_Event *event, GameScreen **newScreen, void *userData)
 {
 	return nullptr;
 }
@@ -233,8 +233,8 @@ bool UIButton::Create(char *text, TTF_Font *font, SDL_Color *rgbaText, SDL_Color
 	int minx = 0;
 	TTF_GlyphMetrics(font, text[strlen(text)],
 		&minx, nullptr, nullptr, nullptr, nullptr);
-	m_Selector.x -= minx;
-	m_Selector.w += minx;
+	m_Selector.x -= minx * 2;
+	m_Selector.w += (minx * 4) - (minx / 2);
 
 	strcpy_s(m_Text, text);
 	m_SelectorColor = *rgbaSelector;
@@ -246,7 +246,7 @@ bool UIButton::Create(char *text, TTF_Font *font, SDL_Color *rgbaText, SDL_Color
 	return true;
 }
 
-UILayout* UIButton::HandleEvents(SDL_Event *event, GameScreen **newScreen, void *userData)
+UILayout* UIButton::HandleInput(SDL_Event *event, GameScreen **newScreen, void *userData)
 {
 	return m_EventHandler ? m_EventHandler(event, newScreen, userData) : nullptr;
 }

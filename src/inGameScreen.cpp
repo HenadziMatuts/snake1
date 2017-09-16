@@ -65,8 +65,25 @@ void Scoreboard::Render(SDL_Renderer *renderer, SDL_Rect *viewport)
 	}
 }
 
-InGameEvent Scoreboard::Update(uint32_t elapsed)
+void Scoreboard::Update(uint32_t elapsed, EventBus *eventBus)
 {
+	/* handle events from game field */
+	auto *events = eventBus->InGameEvents(IN_GAME_EVENT_SOURCE_GAME_FIELD);
+	for (size_t i = 0, n = events->size(); i < n; i++)
+	{
+		switch ((*events)[i])
+		{
+			case INGAME_EVENT_SNAKE_DIED:
+				Stop();
+				Globals::inGameLayout.SnakeDied(m_Score);
+				break;
+
+			case INGAME_EVENT_SNAKE_GROWN:
+				Increment();
+				break;
+		}
+	}
+
 	if (m_GameMode == GAME_MODE_SURVIVAL && m_Score && !m_TimerStopped)
 	{
 		m_TimeLast -= elapsed;
@@ -80,16 +97,17 @@ InGameEvent Scoreboard::Update(uint32_t elapsed)
 		}
 		if (m_TimeLast < 0)
 		{
-			return INGAME_EVENT_SNAKE_DIED;
+			Game::Instance().Events().PostInGameEvent(INGAME_EVENT_SNAKE_DIED, IN_GAME_EVENT_SOURCE_SCOREBOARD);
+			Globals::inGameLayout.SnakeDied(m_Score);
+			m_TimerStopped = true;
 		}
 	}
-	return INGAME_EVENT_NOTHING_HAPPENS;
 }
 
 InGameScreen::InGameScreen()
 {
 	m_CurrentLayout = &Globals::inGameLayout;
-	m_Field.Initilaize(HandleEventsInGame, HandleCollisionsInGame,
+	m_Field.Initilaize(HandleInputInGame, HandleCollisionsInGame,
 				RenderInGame, false, Globals::GRID_DIMENSION, Globals::GRID_DIMENSION,
 				Globals::GAME_SPEED, Globals::BODY_SIZE, Globals::BORDERLESS);
 }
@@ -106,11 +124,11 @@ void InGameScreen::Enter(GameEvent event)
 	}	
 }
 
-GameScreen* InGameScreen::HandleEvents(SDL_Event *event)
+GameScreen* InGameScreen::HandleInput(SDL_Event *event)
 {
 	GameScreen *newScreen = nullptr;
 
-	UILayout *newLayout = m_CurrentLayout->HandleEvents(event, &newScreen);
+	UILayout *newLayout = m_CurrentLayout->HandleInput(event, &newScreen);
 	if (newLayout)
 	{
 		m_CurrentLayout = newLayout;
@@ -119,42 +137,15 @@ GameScreen* InGameScreen::HandleEvents(SDL_Event *event)
 	{
 		return newScreen;
 	}
-	m_Field.HandleEvents(event);
+	m_Field.HandleInput(event);
 	
 	return nullptr;
 }
 
-void InGameScreen::Update(uint32_t elapsed)
+void InGameScreen::Update(uint32_t elapsed, EventBus *eventBus)
 {
-	m_Field.Update(elapsed, &m_EventQueue);
-
-	for (size_t i = 0; m_EventQueue.size(); i++)
-	{
-		switch (m_EventQueue.front())
-		{
-			case INGAME_EVENT_SNAKE_DIED:
-				m_Scoreboard.Stop();
-				Globals::inGameLayout.SnakeDied(m_Scoreboard.Score());
-				break;
-			case INGAME_EVENT_SNAKE_GROWN:
-				m_Scoreboard.Increment();
-				break;
-			default:
-				break;
-		}
-
-		m_EventQueue.pop();
-	}
-
-	switch (m_Scoreboard.Update(elapsed))
-	{
-		case INGAME_EVENT_SNAKE_DIED:
-			m_Field.Stop();
-			Globals::inGameLayout.SnakeDied(m_Scoreboard.Score());
-			break;
-		default:
-			break;
-	}
+	m_Field.Update(elapsed, eventBus);
+	m_Scoreboard.Update(elapsed, eventBus);
 
 	m_CurrentLayout->Update(elapsed);
 }

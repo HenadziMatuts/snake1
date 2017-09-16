@@ -66,7 +66,7 @@ static UILayout* InGameNoButtonEventHandler(SDL_Event *event, GameScreen **newSc
 	return newLayout;
 }
 
-UILayout* InGameLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
+UILayout* InGameLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 {
 	UILayout *newLayout = nullptr;
 
@@ -89,6 +89,7 @@ UILayout* InGameLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
 
 			case SDLK_RETURN:
 			case SDLK_SPACE:
+			case SDLK_ESCAPE:
 				if (!m_SnakeDied)
 				{
 					Globals::menuScreen.Enter(GAME_EVENT_PAUSE);
@@ -98,7 +99,7 @@ UILayout* InGameLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
 			default:
 				if (m_SnakeDied)
 				{
-					newLayout = m_UIButton[m_SelectedButton].HandleEvents(event, newScreen, (void*)&m_SnakeDied);
+					newLayout = m_UIButton[m_SelectedButton].HandleInput(event, newScreen, (void*)&m_SnakeDied);
 				}
 				break;
 		}

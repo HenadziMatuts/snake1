@@ -188,7 +188,7 @@ void NewGameLayout::Enter()
 	
 }
 
-UILayout *NewGameLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
+UILayout *NewGameLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 {
 	UILayout *newLayout = nullptr;
 
@@ -233,7 +233,7 @@ UILayout *NewGameLayout::HandleEvents(SDL_Event *event, GameScreen **newScreen)
 					break;
 				}
 			default:
-				newLayout = m_UIButton[m_SelectedButton].HandleEvents(event, newScreen, (void*)&m_Settings);
+				newLayout = m_UIButton[m_SelectedButton].HandleInput(event, newScreen, (void*)&m_Settings);
 				break;
 		}
 	}

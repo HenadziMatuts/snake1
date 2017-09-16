@@ -35,7 +35,7 @@ class UIWidget {
 public:
 	virtual ~UIWidget() {};
 
-	virtual UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen, void *userData) = 0;
+	virtual UILayout* HandleInput(SDL_Event *event, GameScreen **newScreen, void *userData) = 0;
 	virtual void Render(SDL_Renderer *renderer) = 0;
 };
 
@@ -51,7 +51,7 @@ public:
 	/* false, if dimensions are not updated */
 	bool GetDimensions(SDL_Rect *dimensions);
 
-	UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen, void *userData);
+	UILayout* HandleInput(SDL_Event *event, GameScreen **newScreen, void *userData);
 	void Render(SDL_Renderer *renderer);
 
 private:
@@ -80,7 +80,7 @@ public:
 		bool isVisible, pfnButtonEventHandler eventHandler,
 		float scaleFactor = 1, TextAnchor anchor = TEXT_ANCHOR_CENTER);
 
-	UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen, void *userData);
+	UILayout* HandleInput(SDL_Event *event, GameScreen **newScreen, void *userData);
 	void Render(SDL_Renderer *renderer);
 
 	void SetVisibility(bool isVisible);

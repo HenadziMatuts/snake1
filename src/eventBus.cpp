@@ -5,9 +5,9 @@ void EventBus::PostGameEvent(GameEvent gameEvent)
 	m_GameEvents.push_back(gameEvent);
 };
 
-void EventBus::PostInGameEvent(InGameEvent inGameEvent)
+void EventBus::PostInGameEvent(InGameEvent inGameEvent, InGameEventSource source)
 {
-	m_InGameEvents.push_back(inGameEvent);
+	m_InGameEventsNext[source].push_back(inGameEvent);
 }
 
 std::vector<GameEvent>* EventBus::GameEvents()
@@ -15,13 +15,21 @@ std::vector<GameEvent>* EventBus::GameEvents()
 	return &m_GameEvents;
 }
 
-std::vector<InGameEvent>* EventBus::InGameEvents()
+std::vector<InGameEvent>* EventBus::InGameEvents(InGameEventSource source)
 {
-	return &m_InGameEvents;
+	return &m_InGameEventsCurrent[source];
 }
 
-void EventBus::ClearEvents()
+void EventBus::Proceed()
 {
 	m_GameEvents.clear();
-	m_InGameEvents.clear();
+
+	for (int i = 0; i < IN_GAME_EVENT_SOURCE_TOTAL; i++)
+	{
+		m_InGameEventsCurrent[i].clear();
+	}
+
+	auto *swap = m_InGameEventsCurrent;
+	m_InGameEventsCurrent = m_InGameEventsNext;
+	m_InGameEventsNext = swap;
 }

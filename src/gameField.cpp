@@ -1,3 +1,4 @@
+#include "game.h"
 #include "gameField.h"
 #include "utilities.h"
 #include "globals.h"
@@ -13,11 +14,11 @@ GameField::~GameField()
 	}
 }
 
-void GameField::Initilaize(pfnHandleEvents handleEvents, pfnHandleCollisions handleCollisions, pfnRender render,
+void GameField::Initilaize(pfnHandleInput HandleInput, pfnHandleCollisions handleCollisions, pfnRender render,
 		bool stretch, uint32_t gridDimensionX, uint32_t gridDimensionY,
 		int speed, int startBodySize, bool borderless)
 {
-	m_HandleEvents = handleEvents;
+	m_HandleInput = HandleInput;
 	m_HandleCollisions = handleCollisions;
 	m_Render = render;
 	if (m_GridDimensionX != gridDimensionX
@@ -113,15 +114,13 @@ void GameField::Resize(uint32_t gridDimensionX, uint32_t gridDimensionY, bool st
 	m_FieldRect.y = m_Grid[0].m_Rect.y;
 }
 
-void GameField::HandleEvents(SDL_Event *event)
+void GameField::HandleInput(SDL_Event *event)
 {
-	m_HandleEvents(this, event);
+	m_HandleInput(this, event);
 }
 
-//InGameEvent GameField::Update(uint32_t elapsed)
-void GameField::Update(uint32_t elapsed, std::queue<InGameEvent> *events)
+void GameField::Update(uint32_t elapsed, EventBus *eventBus)
 {
-	bool ret = false;
 	m_Elapsed += elapsed;
 
 	if (!m_Snake.IsAlive())
@@ -131,29 +130,44 @@ void GameField::Update(uint32_t elapsed, std::queue<InGameEvent> *events)
 		{
 			SpawnFood();
 		}
-		ret = true;
+		return;
 	}
-	if (!ret)
+
+	/* handle events from scoreboard */
+	auto events = eventBus->InGameEvents(IN_GAME_EVENT_SOURCE_SCOREBOARD);
+	for (size_t i = 0, n = events->size(); i < n; i++)
 	{
-		uint32_t upd = 1000 / m_GameSpeed;
-		while (m_Elapsed >= upd)
+		if ((*events)[i] == INGAME_EVENT_SNAKE_DIED)
 		{
-			if (!m_Food.IsAlive() && !m_Snake.IsStoped())
-			{
-				SpawnFood();
-			}
-
-			/* extinguish tail cell */
-			m_Grid[(m_GridDimensionY *  m_Snake.TailPosX()) + m_Snake.TailPosY()].m_State = CELL_STATE_EMPTY;
-
-			/* update snake position */
-			m_Snake.Update(m_GridDimensionX, m_GridDimensionY);
-			
-			/* handle collisions */
-			events->push(m_HandleCollisions(this));
-
-			m_Elapsed -= upd;
+			m_ShouldStop = true;
 		}
+	}
+
+	uint32_t upd = 1000 / m_GameSpeed;
+	while (m_Elapsed >= upd)
+	{
+		if (!m_Food.IsAlive() && !m_Snake.IsStoped())
+		{
+			SpawnFood();
+		}
+
+		/* extinguish tail cell */
+		m_Grid[(m_GridDimensionY *  m_Snake.TailPosX()) + m_Snake.TailPosY()].m_State = CELL_STATE_EMPTY;
+
+		/* update snake position */
+		m_Snake.Update(m_GridDimensionX, m_GridDimensionY);
+			
+		/* handle collisions */
+		if (m_ShouldStop)
+		{
+			m_Snake.Stop();
+		}
+		else
+		{
+			Game::Instance().Events().PostInGameEvent(m_HandleCollisions(this), IN_GAME_EVENT_SOURCE_GAME_FIELD);
+		}
+
+		m_Elapsed -= upd;
 	}
 }
 
@@ -203,6 +217,8 @@ void GameField::Reset()
 		m_Food.Kill();
 	}
 	RecalculateField(true);
+
+	m_ShouldStop = false;
 }
 
 
@@ -273,7 +289,7 @@ void GameField::RecalculateField(bool clear)
 	}
 }
 
-void HandleEventsInGame(GameField *_this, SDL_Event *event)
+void HandleInputInGame(GameField *_this, SDL_Event *event)
 {
 	/* pass input event to snake instance */
 	_this->m_Snake.HandleInput(event);
@@ -286,8 +302,15 @@ InGameEvent HandleCollisionsInGame(GameField *_this)
 
 	if (!_this->m_IsBorderless && _this->m_Snake.IsCrossedTheBound())
 	{
-		_this->m_Snake.Stop();
-		return INGAME_EVENT_SNAKE_DIED;
+		if (!_this->m_Snake.IsStoped())
+		{
+			_this->m_Snake.Stop();
+			return INGAME_EVENT_SNAKE_DIED;
+		}
+		else
+		{
+			return INGAME_EVENT_NOTHING_HAPPENS;
+		}
 	}
 
 	switch (_this->m_Grid[headCellIndex].m_State)
@@ -297,9 +320,16 @@ InGameEvent HandleCollisionsInGame(GameField *_this)
 			return INGAME_EVENT_NOTHING_HAPPENS;
 
 		case CELL_STATE_SNAKE:
-			_this->m_Snake.Stop();
-			return INGAME_EVENT_SNAKE_DIED;
-
+			if (!_this->m_Snake.IsStoped())
+			{
+				_this->m_Snake.Stop();
+				return INGAME_EVENT_SNAKE_DIED;
+			}
+			else
+			{
+				return INGAME_EVENT_NOTHING_HAPPENS;
+			}
+				
 		case CELL_STATE_FOOD:
 			_this->m_Food.Kill();
 			_this->m_Grid[headCellIndex].m_State = CELL_STATE_SNAKE;
@@ -307,8 +337,15 @@ InGameEvent HandleCollisionsInGame(GameField *_this)
 			_this->m_Snake.Grow(_this->m_GridDimensionX, _this->m_GridDimensionY);
 			if (!_this->m_IsBorderless && _this->m_Snake.IsCrossedTheBound())
 			{
-				_this->m_Snake.Stop();
-				return INGAME_EVENT_SNAKE_DIED;
+				if (!_this->m_Snake.IsStoped())
+				{
+					_this->m_Snake.Stop();
+					return INGAME_EVENT_SNAKE_DIED;
+				}
+				else
+				{
+					return INGAME_EVENT_NOTHING_HAPPENS;
+				}
 			}
 			
 			return INGAME_EVENT_SNAKE_GROWN;
@@ -515,7 +552,7 @@ void RenderInGame(GameField *_this, SDL_Renderer *renderer)
 	}
 }
 
-void HandleEventsDemo(GameField *_this, SDL_Event *event)
+void HandleInputDemo(GameField *_this, SDL_Event *event)
 {
 	return;
 }

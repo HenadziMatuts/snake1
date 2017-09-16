@@ -12,8 +12,8 @@ public:
 	MenuScreen();
 
 	void Enter(GameEvent event);
-	GameScreen* HandleEvents(SDL_Event *event);
-	void Update(uint32_t elapsed);
+	GameScreen* HandleInput(SDL_Event *event);
+	void Update(uint32_t elapsed, EventBus *eventBus);
 	void Render(SDL_Renderer *renderer);
 
 	void Resize();

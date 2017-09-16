@@ -137,7 +137,7 @@ int Game::Run()
 					break;
 
 				default:
-					newScreen = currentScreen->HandleEvents(&event);
+					newScreen = currentScreen->HandleInput(&event);
 					if (newScreen)
 					{
 						currentScreen = newScreen;
@@ -147,7 +147,7 @@ int Game::Run()
 		}
 
 		/* update state */
-		currentScreen->Update(elapsed);
+		currentScreen->Update(elapsed, &m_EventBus);
 
 		/* handling events */
 		std::vector<GameEvent> *gameEvents = m_EventBus.GameEvents();
@@ -163,7 +163,7 @@ int Game::Run()
 			}
 		}
 
-		m_EventBus.ClearEvents();
+		m_EventBus.Proceed();
 
 		/* render */
 		Render(currentScreen);

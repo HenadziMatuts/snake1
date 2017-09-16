@@ -23,7 +23,7 @@ public:
 		m_SelectedButton(IN_GAME_UI_BUTTON_YES)
 	{};
 
-	UILayout* HandleEvents(SDL_Event *event, GameScreen **newScreen);
+	UILayout* HandleInput(SDL_Event *event, GameScreen **newScreen);
 	GameEvent Update(uint32_t elapsed);
 	void Render(SDL_Renderer *renderer);
 
