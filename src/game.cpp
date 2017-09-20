@@ -183,7 +183,8 @@ bool Game::RebuidUI()
 	if (!Globals::menuLayout.CreateLayout(m_Renderer)
 		|| !Globals::inGameLayout.CreateLayout(m_Renderer)
 		|| !Globals::settingsLayout.CreateLayout(m_Renderer)
-		|| !Globals::newGameLayout.CreateLayout(m_Renderer))
+		|| !Globals::newGameLayout.CreateLayout(m_Renderer)
+		|| !Globals::profileLayout.CreateLayout(m_Renderer))
 	{
 		return false;
 	}
@@ -259,6 +260,7 @@ int Game::Quit()
 	Globals::inGameLayout.DestroyLayout();
 	Globals::settingsLayout.DestroyLayout();
 	Globals::newGameLayout.DestroyLayout();
+	Globals::profileLayout.DestroyLayout();
 
 	/* Destroy window and renderer */
 	SDL_DestroyRenderer(m_Renderer);

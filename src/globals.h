@@ -2,6 +2,7 @@
 #include "menuScreen.h"
 #include "menuLayout.h"
 #include "settingsLayout.h"
+#include "profileLayout.h"
 #include "inGameScreen.h"
 #include "inGameLayout.h"
 #include "newGameLayout.h"
@@ -48,6 +49,7 @@ namespace Globals
 	extern InGameLayout inGameLayout;
 	extern NewGameLayout newGameLayout;
 	extern SettingsLayout settingsLayout;
+	extern ProfileLayout profileLayout;
 
 	char* Time();
 

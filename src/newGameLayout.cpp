@@ -282,7 +282,7 @@ bool NewGameLayout::CreateLayout(SDL_Renderer *renderer)
 	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
 	SDL_Color *selectorc = &Globals::COLOR_SCHEME->m_ButtonSelector;
 	
-	if (!m_UILabel[NEW_GAME_UI_LABEL_TITLE].Create("set up a new game", font, textc, renderer, 0.5f, 0.125f, true, 0.8f)
+	if (!m_UILabel[NEW_GAME_UI_LABEL_TITLE].Create("set up a new game", font, textc, renderer, 0.5f, 0.125f, true, 0.75f)
 
 		|| !m_UILabel[NEW_GAME_UI_LABEL_TRAINING].Create("training", font, textc, renderer,
 			0.53125f, (float)9 / 32, false, 0.45f, TEXT_ANCHOR_MID_LEFT)

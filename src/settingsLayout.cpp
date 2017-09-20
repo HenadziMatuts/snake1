@@ -267,7 +267,7 @@ bool SettingsLayout::CreateLayout(SDL_Renderer *renderer)
 	char resolution[10];
 	sprintf_s(resolution, "%dx%d", m_Settings.m_ResolutionWidth, m_Settings.m_ResolutionHeight);
 
-	if (!m_UILabel[SETTINGS_UI_LABEL_TITLE].Create("settings", font, textc, renderer, 0.5f, 0.125f, true, 0.8f)
+	if (!m_UILabel[SETTINGS_UI_LABEL_TITLE].Create("settings", font, textc, renderer, 0.5f, 0.125f, true, 0.75f)
 		|| !m_UILabel[SETTINGS_UI_LABEL_SMOOTH].Create("smooth", font, textc, renderer,
 			0.53125f, 0.28125f, false, 0.45f, TEXT_ANCHOR_MID_LEFT)
 		|| !m_UILabel[SETTINGS_UI_LABEL_DISCRETE].Create("discrete", font, textc, renderer,

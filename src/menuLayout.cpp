@@ -65,6 +65,25 @@ static UILayout* MenuSettingsButtonEventHandler(SDL_Event *event, GameScreen **n
 	return newLayout;
 }
 
+static UILayout* MenuProfileButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
+{
+	UILayout *newLayout = nullptr;
+
+	if (event->type == SDL_KEYUP)
+	{
+		switch (event->key.keysym.sym)
+		{
+			case SDLK_RETURN:
+			case SDLK_SPACE:
+				Globals::profileLayout.Enter();
+				newLayout = &Globals::profileLayout;
+				break;
+		}
+	}
+
+	return newLayout;
+}
+
 static UILayout* MenuExitButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
 {
 	MenuButtonEvenHandlersData *data = (MenuButtonEvenHandlersData*)userData;
@@ -235,13 +254,15 @@ bool MenuLayout::CreateLayout(SDL_Renderer *renderer)
 	}
 
 	if (!m_UIButton[MENU_UI_BUTTON_RESUME].Create("resume", font, textc,
-		selectorc, renderer, 0.5f, 0.55f, false, MenuResumeButtonEventHandler, 0.45f)
+		selectorc, renderer, 0.5f, 0.45f, false, MenuResumeButtonEventHandler, 0.45f)
 		|| !m_UIButton[MENU_UI_BUTTON_NEW_GAME].Create("new game", font, textc,
-			selectorc, renderer, 0.5f, 0.65f, false, MenuNewGameButtonEventHandler, 0.45f)
+			selectorc, renderer, 0.5f, 0.56f, false, MenuNewGameButtonEventHandler, 0.45f)
 		|| !m_UIButton[MENU_UI_BUTTON_SETTINGS].Create("settings", font, textc,
-			selectorc, renderer, 0.5f, 0.75f, false, MenuSettingsButtonEventHandler, 0.45f)
+			selectorc, renderer, 0.5f, 0.67f, false, MenuSettingsButtonEventHandler, 0.45f)
+		|| !m_UIButton[MENU_UI_BUTTON_PROFILE].Create("profile", font, textc,
+			selectorc, renderer, 0.5f, 0.78f, false, MenuProfileButtonEventHandler, 0.45f)
 		|| !m_UIButton[MENU_UI_BUTTON_EXIT].Create("exit", font, textc,
-			selectorc, renderer, 0.5f, 0.85f, false, MenuExitButtonEventHandler, 0.45f))
+			selectorc, renderer, 0.5f, 0.89f, false, MenuExitButtonEventHandler, 0.45f))
 	{
 		return false;
 	}
@@ -350,6 +371,7 @@ void MenuLayout::WakeUp()
 	m_UIButton[MENU_UI_BUTTON_RESUME].SetVisibility(m_IsPaused ? true : false);
 	m_UIButton[MENU_UI_BUTTON_NEW_GAME].SetVisibility(true);
 	m_UIButton[MENU_UI_BUTTON_SETTINGS].SetVisibility(true);
+	m_UIButton[MENU_UI_BUTTON_PROFILE].SetVisibility(true);
 	m_UIButton[MENU_UI_BUTTON_EXIT].SetVisibility(true);
 
 	m_WakeTime = 0;
@@ -362,5 +384,6 @@ void MenuLayout::FallAsleep()
 	m_UIButton[MENU_UI_BUTTON_RESUME].SetVisibility(false);
 	m_UIButton[MENU_UI_BUTTON_NEW_GAME].SetVisibility(false);
 	m_UIButton[MENU_UI_BUTTON_SETTINGS].SetVisibility(false);
+	m_UIButton[MENU_UI_BUTTON_PROFILE].SetVisibility(false);
 	m_UIButton[MENU_UI_BUTTON_EXIT].SetVisibility(false);
 }

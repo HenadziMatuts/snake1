@@ -33,6 +33,7 @@ MenuLayout Globals::menuLayout;
 InGameLayout Globals::inGameLayout;
 SettingsLayout Globals::settingsLayout;
 NewGameLayout Globals::newGameLayout;
+ProfileLayout Globals::profileLayout;
 
 char* Globals::Time()
 {
