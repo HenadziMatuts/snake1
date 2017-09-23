@@ -68,6 +68,16 @@ private:
 	void Render(GameScreen *screen);
 
 	/**
+	 *
+	 */
+	bool ReadSettings();
+
+	/**
+	 *
+	 */
+	bool StoreSettings();
+
+	/**
 	 * Deinitilize subsystems and quit.
 	 */
 	int Quit();

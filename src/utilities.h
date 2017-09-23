@@ -42,9 +42,32 @@ public:
 	static size_t GetIniStringValue(char *section, char *key, char *default,
 					char *out, size_t size, const char *iniPath);
 
+	/**
+	 *
+	 */
+	static uint32_t GetIniUintValue(char *section, char *key, uint32_t default, const char *iniPath);
+	
+	/**
+	 *
+	 */
+	static bool WriteIniSection(char *section, const char *iniPath);
+
+	/**
+	 *
+	 */
+	static bool WriteIniString(char *section, char *key, char *value, const char *iniPath);
+
+
 	static bool IsHexString(char *str);
 
 	static bool IsBigEndian();
+
+	static AspectRatio GetAspectRatio(int w, int h);
+
+
+	static bool FileExists(const char *path);
+	static bool CreateNewFile(const char *path);
+	static bool CreateNewDirectory(const char *path);
 };
 
 #define LOG_INFO(format, ...) fprintf(Globals::LOG, "[%s] INFO: "##format##"\n", Globals::Time(), __VA_ARGS__)

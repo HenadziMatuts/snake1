@@ -3,6 +3,7 @@
 #include <cstring>
 #include <random>
 #include <cstdarg>
+#include <stdio.h>
 #ifdef _WIN32
 	#include <Windows.h>
 #endif
@@ -112,6 +113,33 @@ size_t Utilities::GetIniStringValue(char *section, char *key, char *default,
 	return ret;
 }
 
+uint32_t Utilities::GetIniUintValue(char *section, char *key, uint32_t default, const char *iniPath)
+{
+	uint32_t ret = default;
+#ifdef _WIN32
+	ret = GetPrivateProfileInt(section, key, default, iniPath);
+#endif
+	return ret;
+}
+
+bool Utilities::WriteIniSection(char *section, const char *iniPath)
+{
+	bool ret = false;
+#ifdef _WIN32
+	ret = (WritePrivateProfileSection(section, "", iniPath) == TRUE);
+#endif
+	return ret;
+}
+
+bool Utilities::WriteIniString(char *section, char *key, char *value, const char *iniPath)
+{
+	bool ret = false;
+#ifdef _WIN32
+	ret = (WritePrivateProfileString(section, key, value, iniPath) == TRUE);
+#endif
+	return ret;
+}
+
 bool Utilities::IsHexString(char *str)
 {
 	if (!str)
@@ -141,4 +169,57 @@ bool Utilities::IsBigEndian()
 	} x = { 0x01020304 };
 
 	return x.c[0] == 1;
+}
+
+AspectRatio Utilities::GetAspectRatio(int w, int h)
+{
+	float f = (float)w / h;
+
+	if (f > 1.3f && f < 1.4f)
+	{
+		return ASPECT_RATIO_4_3;
+	}
+	else if (f > 1.7f && f < 1.8f)
+	{
+		return ASPECT_RATIO_16_9;
+	}
+	else
+	{
+		return ASPECT_RATIO_UNKNOWN;
+	}
+}
+
+bool Utilities::FileExists(const char *path)
+{
+	bool ret = false;
+
+#ifdef _WIN32
+	ret = (GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES);
+#endif
+
+	return ret;
+}
+
+bool Utilities::CreateNewFile(const char *path)
+{
+	FILE *f = nullptr;
+
+	fopen_s(&f, path, "w+");
+	if (!f)
+	{
+		return false;
+	}
+
+	fclose(f);
+	return true;
+}
+
+bool Utilities::CreateNewDirectory(const char *path)
+{
+	bool ret = false;
+#ifdef _WIN32
+	ret = (CreateDirectory(path, nullptr) == TRUE);
+#endif
+
+	return ret;
 }

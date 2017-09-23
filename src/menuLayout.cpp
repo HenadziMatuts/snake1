@@ -241,28 +241,40 @@ bool MenuLayout::CreateLayout(SDL_Renderer *renderer)
 	TTF_Font *font = Game::Instance().Resources().GetFont();
 	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
 	SDL_Color *selectorc = &Globals::COLOR_SCHEME->m_ButtonSelector;
+	bool is4_3 = Globals::ASPECT_RATIO == ASPECT_RATIO_4_3;
 
-	if (!m_UILabel[MENU_UI_TITLE].Create("snake !", font, textc, renderer, 0.5f, 0.25f, true, 1.8f)
+	float x = is4_3 ? 0.07f : 0.15f;
+	float scale = is4_3 ? 1.6f : 1.8f;
+
+	if (!m_UILabel[MENU_UI_TITLE].Create("snake !", font, textc, renderer, x, 0.4f, true, scale, TEXT_ANCHOR_MID_LEFT)
 		|| !m_UILabel[MENU_UI_INVITE_START].Create("press space to start", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
 		|| !m_UILabel[MENU_UI_INVITE_SETTINGS].Create("press s to settings", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
 		|| !m_UILabel[MENU_UI_INVITE_EXIT].Create("press x to win", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
 		|| !m_UILabel[MENU_UI_INVITE_RESUME].Create("press space to resume", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
 		|| !m_UILabel[MENU_UI_INVITE_RESTART].Create("press r to restart", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
-		|| !m_UILabel[MENU_UI_INVITE_CREDITS].Create("press c to credits", font, textc, renderer, 0.5f, 0.75f, false, 0.45f))
+		|| !m_UILabel[MENU_UI_INVITE_CREDITS].Create("press c to credits", font, textc, renderer, 0.5f, 0.75f, false, 0.45f)
+		|| !m_UILabel[MENU_UI_AIZ7103].Create("by henadzi matuts", font, textc, renderer,
+			is4_3 ? 0.78f : 0.75f, is4_3 ? 0.31f : 0.3f, true, 0.35f))
 	{
 		return false;
 	}
 
-	if (!m_UIButton[MENU_UI_BUTTON_RESUME].Create("resume", font, textc,
-		selectorc, renderer, 0.5f, 0.45f, false, MenuResumeButtonEventHandler, 0.45f)
-		|| !m_UIButton[MENU_UI_BUTTON_NEW_GAME].Create("new game", font, textc,
-			selectorc, renderer, 0.5f, 0.56f, false, MenuNewGameButtonEventHandler, 0.45f)
-		|| !m_UIButton[MENU_UI_BUTTON_SETTINGS].Create("settings", font, textc,
-			selectorc, renderer, 0.5f, 0.67f, false, MenuSettingsButtonEventHandler, 0.45f)
-		|| !m_UIButton[MENU_UI_BUTTON_PROFILE].Create("profile", font, textc,
-			selectorc, renderer, 0.5f, 0.78f, false, MenuProfileButtonEventHandler, 0.45f)
-		|| !m_UIButton[MENU_UI_BUTTON_EXIT].Create("exit", font, textc,
-			selectorc, renderer, 0.5f, 0.89f, false, MenuExitButtonEventHandler, 0.45f))
+	x = is4_3 ? 0.82f : 0.75f;
+
+	if (!m_UIButton[MENU_UI_BUTTON_RESUME].Create("resume", font, textc, selectorc, renderer,
+		x, 0.17f, false, MenuResumeButtonEventHandler, 0.42f)
+		|| !m_UIButton[MENU_UI_BUTTON_NEW_GAME].Create("new game", font, textc, selectorc, renderer,
+			x, 0.28f, false, MenuNewGameButtonEventHandler, 0.42f)
+		|| !m_UIButton[MENU_UI_BUTTON_PROFILE].Create("profile", font, textc, selectorc, renderer,
+			x, 0.39f, false, MenuProfileButtonEventHandler, 0.42f)
+		|| !m_UIButton[MENU_UI_BUTTON_HIGH_SCORES].Create("high scores", font, textc, selectorc, renderer,
+			x, 0.50f, false, nullptr, 0.42f)
+		|| !m_UIButton[MENU_UI_BUTTON_SETTINGS].Create("settings", font, textc, selectorc, renderer,
+			x, 0.61f, false, MenuSettingsButtonEventHandler, 0.42f)
+		|| !m_UIButton[MENU_UI_BUTTON_CREDITS].Create("credits", font, textc, selectorc, renderer,
+			x, 0.72f, false, nullptr, 0.42f)
+		|| !m_UIButton[MENU_UI_BUTTON_EXIT].Create("exit", font, textc, selectorc, renderer,
+			x, 0.83f, false, MenuExitButtonEventHandler, 0.42f))
 	{
 		return false;
 	}
@@ -367,11 +379,14 @@ void MenuLayout::WakeUp()
 {
 	m_IsSleeping = false;
 	m_UILabel[m_ActiveInvites[m_VisibleActiveInviteIndex]].SetVisibility(false);
+	m_UILabel[MENU_UI_AIZ7103].SetVisibility(false);
 
 	m_UIButton[MENU_UI_BUTTON_RESUME].SetVisibility(m_IsPaused ? true : false);
 	m_UIButton[MENU_UI_BUTTON_NEW_GAME].SetVisibility(true);
-	m_UIButton[MENU_UI_BUTTON_SETTINGS].SetVisibility(true);
 	m_UIButton[MENU_UI_BUTTON_PROFILE].SetVisibility(true);
+	m_UIButton[MENU_UI_BUTTON_HIGH_SCORES].SetVisibility(true);
+	m_UIButton[MENU_UI_BUTTON_SETTINGS].SetVisibility(true);
+	m_UIButton[MENU_UI_BUTTON_CREDITS].SetVisibility(true);
 	m_UIButton[MENU_UI_BUTTON_EXIT].SetVisibility(true);
 
 	m_WakeTime = 0;
@@ -381,9 +396,13 @@ void MenuLayout::FallAsleep()
 {
 	m_IsSleeping = true;
 	
+	m_UILabel[MENU_UI_AIZ7103].SetVisibility(true);
+
 	m_UIButton[MENU_UI_BUTTON_RESUME].SetVisibility(false);
 	m_UIButton[MENU_UI_BUTTON_NEW_GAME].SetVisibility(false);
-	m_UIButton[MENU_UI_BUTTON_SETTINGS].SetVisibility(false);
 	m_UIButton[MENU_UI_BUTTON_PROFILE].SetVisibility(false);
+	m_UIButton[MENU_UI_BUTTON_HIGH_SCORES].SetVisibility(false);
+	m_UIButton[MENU_UI_BUTTON_SETTINGS].SetVisibility(false);
+	m_UIButton[MENU_UI_BUTTON_CREDITS].SetVisibility(false);
 	m_UIButton[MENU_UI_BUTTON_EXIT].SetVisibility(false);
 }

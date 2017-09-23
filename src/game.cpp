@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <cstdint>
 
+const char *USER_FOLDER_PATH = "user";
+const char *COMMON_INI_PATH = "user\\common.ini";
+
 void ExitCallback()
 {
 	exit(1);
@@ -35,6 +38,30 @@ void Game::Initialize()
 	}
 	LOG_INFO("Initializing SDL...OK");
 
+	LOG_INFO("Initializing SDL_ttf...");
+	if (TTF_Init() == -1)
+	{
+		LOG_FATAL("SDL_ttf could not initialize! SDL_ttf Error: %s", TTF_GetError());
+		CRASH(ExitCallback);
+	}
+	LOG_INFO("Initializing SDL_ttf...OK");
+
+	LOG_INFO("Loading resources...");
+	if (!m_ResourceManager.LoadResources())
+	{
+		LOG_FATAL("Unable to load resources");
+		CRASH(ExitCallback);
+	}
+	LOG_INFO("Loading resources...OK");
+
+	LOG_INFO("Reading settings...");
+	if (!ReadSettings())
+	{
+		LOG_FATAL("Unable to read settings");
+		CRASH(ExitCallback);
+	}
+	LOG_INFO("Reading settings...OK");
+
 	LOG_INFO("Creating window...");
 	SDL_DisplayMode target, matching;
 	target.w = Globals::SCREEN_WIDTH;
@@ -42,6 +69,7 @@ void Game::Initialize()
 	target.format = 0;
 	target.refresh_rate = 0;
 	target.driverdata = 0;
+
 
 	if (!SDL_GetClosestDisplayMode(0, &target, &matching))
 	{
@@ -66,8 +94,15 @@ void Game::Initialize()
 	for (int i = n - 1; i >= 0; i--)
 	{
 		SDL_DisplayMode mode;
+		AspectRatio ar;
+
 		SDL_GetDisplayMode(0, i, &mode);
-		m_DisplayModes.push_back(mode);
+
+		ar = Utilities::GetAspectRatio(mode.w, mode.h);
+		if (ar != ASPECT_RATIO_UNKNOWN)
+		{
+			m_DisplayModes.push_back(mode);
+		}
 	}
 
 	LOG_INFO("Creating renderer...");
@@ -82,22 +117,6 @@ void Game::Initialize()
 	/* Initialize renderer */
 	SDL_SetRenderDrawBlendMode(m_Renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(m_Renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-	LOG_INFO("Initializing SDL_ttf...");
-	if (TTF_Init() == -1)
-	{
-		LOG_FATAL("SDL_ttf could not initialize! SDL_ttf Error: %s", TTF_GetError());
-		CRASH(ExitCallback);
-	}
-	LOG_INFO("Initializing SDL_ttf...OK");
-
-	LOG_INFO("Loading resources...");
-	if (!m_ResourceManager.LoadResources())
-	{
-		LOG_FATAL("Unable to load resources");
-		CRASH(ExitCallback);
-	}
-	LOG_INFO("Loading resources...OK");
 
 	LOG_INFO("Building UI...");
 	if (!RebuidUI())
@@ -175,10 +194,7 @@ int Game::Run()
 bool Game::RebuidUI()
 {
 	Globals::WINDOW_SCALE_FACTOR = (float)Globals::SCREEN_HEIGHT / 600;
-	Globals::ASPECT_RATIO =
-		(((float)Globals::SCREEN_WIDTH / Globals::SCREEN_HEIGHT) > 1.3f
-			&& ((float)Globals::SCREEN_WIDTH / Globals::SCREEN_HEIGHT) < 1.4f) ?
-		ASPECT_RATIO_4_3 : ASPECT_RATIO_16_9;
+	Globals::ASPECT_RATIO = Utilities::GetAspectRatio(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT);
 
 	if (!Globals::menuLayout.CreateLayout(m_Renderer)
 		|| !Globals::inGameLayout.CreateLayout(m_Renderer)
@@ -188,6 +204,9 @@ bool Game::RebuidUI()
 	{
 		return false;
 	}
+
+	Globals::menuScreen.Resize();
+	Globals::inGameScreen.Resize();
 
 	return true;
 }
@@ -250,8 +269,117 @@ void Game::Render(GameScreen *screen)
 	SDL_RenderPresent(m_Renderer);
 }
 
+bool Game::ReadSettings()
+{
+	if (Utilities::FileExists(COMMON_INI_PATH))
+	{
+		while (1)
+		{
+			uint32_t u = 0;
+
+			LOG_INFO("Reading \"fullscreen\" option");
+			u = Utilities::GetIniUintValue("common", "fullscreen", INT_MAX, COMMON_INI_PATH);
+			if (u > 1)
+			{
+				LOG_WARN("Invalid syntax, fallback to defaults");
+				break;
+			}
+			Globals::FULLSCREEN = (u == 0) ? false : true;
+
+			LOG_INFO("Reading \"screenw\" option");
+			u = Utilities::GetIniUintValue("common", "screenw", INT_MAX, COMMON_INI_PATH);
+			if (u == 0 || u == INT_MAX)
+			{
+				LOG_WARN("Invalid syntax, fallback to defaults");
+				break;
+			}
+			Globals::SCREEN_WIDTH = u;
+
+			LOG_INFO("Reading \"screenh\" option");
+			u = Utilities::GetIniUintValue("common", "screenh", INT_MAX, COMMON_INI_PATH);
+			if (u == 0 || u == INT_MAX)
+			{
+				LOG_WARN("Invalid syntax, fallback to defaults");
+				break;
+			}
+			Globals::SCREEN_HEIGHT = u;
+
+			return true;
+		}
+	}
+	else
+	{
+		LOG_WARN("No \"%s\" file, fallback to default settings", COMMON_INI_PATH);
+	}
+		
+	SDL_DisplayMode mode;
+	SDL_GetCurrentDisplayMode(0, &mode);
+
+	Globals::FULLSCREEN = true;
+	Globals::SCREEN_WIDTH = mode.w;
+	Globals::SCREEN_HEIGHT = mode.h;
+
+	return true;
+}
+
+bool Game::StoreSettings()
+{
+	/* create settings file if it is not exists */
+	if (!Utilities::FileExists(COMMON_INI_PATH))
+	{
+		if (!Utilities::FileExists(USER_FOLDER_PATH))
+		{
+			LOG_INFO("Creating \"%s\" folder", USER_FOLDER_PATH);
+			if (!Utilities::CreateNewDirectory(USER_FOLDER_PATH))
+			{
+				LOG_ERR("Failed creating \"%s\" folder", USER_FOLDER_PATH);
+				return false;
+			}
+		}
+
+		LOG_INFO("Creating \"%s\" file", COMMON_INI_PATH);
+		if (!Utilities::CreateNewFile(COMMON_INI_PATH))
+		{
+			LOG_ERR("Failed creating \"%s\" file", COMMON_INI_PATH);
+			return false;
+		}
+	}
+
+	/* writing current settings */
+	if (!Utilities::WriteIniSection("common", COMMON_INI_PATH))
+	{
+		LOG_ERR("Failed writing \"common\" section in \"%s\" file",  COMMON_INI_PATH);
+		return false;
+	}
+	if (!Utilities::WriteIniString("common", "fullscreen",
+		Globals::FULLSCREEN ? "1" : "0", COMMON_INI_PATH))
+	{
+		LOG_ERR("Failed writing \"fullscreen\" value in \"%s\" file", COMMON_INI_PATH);
+		return false;
+	}
+
+	char num[5];
+
+	_itoa_s(Globals::SCREEN_WIDTH, num, 10);
+	if (!Utilities::WriteIniString("common", "screenw", num, COMMON_INI_PATH))
+	{
+		LOG_ERR("Failed writing \"screenw\" value in \"%s\" file", COMMON_INI_PATH);
+		return false;
+	}
+	_itoa_s(Globals::SCREEN_HEIGHT, num, 10);
+	if (!Utilities::WriteIniString("common", "screenh", num, COMMON_INI_PATH))
+	{
+		LOG_ERR("Failed writing \"screenh\" value in \"%s\" file", COMMON_INI_PATH);
+		return false;
+	}
+
+	return true;
+}
+
 int Game::Quit()
 {
+	StoreSettings();
+
 	/* Unload resources */
 	m_ResourceManager.UnloadResources();
 
