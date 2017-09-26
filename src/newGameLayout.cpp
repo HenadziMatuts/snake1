@@ -19,7 +19,6 @@ static UILayout* NewGameStartButtonEventHandler(SDL_Event *event, GameScreen **n
 				Globals::BODY_SIZE = settings->m_BodySize;
 				Globals::BORDERLESS = settings->m_IsBorderless;
 
-				newLayout = &Globals::menuLayout;
 				Globals::inGameScreen.Enter(GAME_EVENT_RESTART);
 				*newScreen = &Globals::inGameScreen;
 
@@ -47,7 +46,9 @@ static UILayout* NewGameBackButtonEventHandler(SDL_Event *event, GameScreen **ne
 				Globals::BODY_SIZE = settings->m_BodySize;
 				Globals::BORDERLESS = settings->m_IsBorderless;
 
+				Globals::menuLayout.Enter();
 				newLayout = &Globals::menuLayout;
+				Globals::menuLayout.SetPauseLayout(false);
 				break;
 		}
 	}

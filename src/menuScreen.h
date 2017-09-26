@@ -20,6 +20,12 @@ public:
 
 private:
 	UILayout *m_CurrentLayout;
-
 	GameField m_Demo;
+
+	/* layouts crossfading */
+	bool m_Fading;
+	uint32_t m_FadingTimer;
+
+	UILayout *m_NewLayout;
+	bool m_LayoutSwitched;
 };

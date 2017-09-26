@@ -102,6 +102,8 @@ static UILayout* SettingBackButtonEventHandler(SDL_Event *event, GameScreen **ne
 			case SDLK_RETURN:
 			case SDLK_SPACE:
 				Globals::SMOOTH_MOVEMENT = settings->m_SmoothMovement;
+
+				Globals::menuLayout.Enter();
 				newLayout = &Globals::menuLayout;
 				break;
 		}

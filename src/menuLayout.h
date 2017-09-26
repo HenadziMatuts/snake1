@@ -48,6 +48,8 @@ public:
 		m_IsSleeping(true)
 	{};
 
+	void Enter();
+
 	UILayout* HandleInput(SDL_Event *event, GameScreen **newScreen);
 	GameEvent Update(uint32_t elapsed);
 	void Render(SDL_Renderer *renderer);

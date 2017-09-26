@@ -46,6 +46,23 @@ void Game::Initialize()
 	}
 	LOG_INFO("Initializing SDL_ttf...OK");
 
+	LOG_INFO("Detecting aviable video modes...");
+	int n = SDL_GetNumDisplayModes(0);
+	for (int i = n - 1; i >= 0; i--)
+	{
+		SDL_DisplayMode mode;
+		AspectRatio ar;
+
+		SDL_GetDisplayMode(0, i, &mode);
+
+		ar = Utilities::GetAspectRatio(mode.w, mode.h);
+		if (ar != ASPECT_RATIO_UNKNOWN)
+		{
+			m_DisplayModes.push_back(mode);
+		}
+	}
+	LOG_INFO("Detecting aviable video modes...OK");
+
 	LOG_INFO("Loading resources...");
 	if (!m_ResourceManager.LoadResources())
 	{
@@ -70,7 +87,6 @@ void Game::Initialize()
 	target.refresh_rate = 0;
 	target.driverdata = 0;
 
-
 	if (!SDL_GetClosestDisplayMode(0, &target, &matching))
 	{
 		LOG_FATAL("Can't find suitable display mode");
@@ -89,21 +105,6 @@ void Game::Initialize()
 		CRASH(ExitCallback);
 	}
 	LOG_INFO("Creating window...OK");
-
-	int n = SDL_GetNumDisplayModes(0);
-	for (int i = n - 1; i >= 0; i--)
-	{
-		SDL_DisplayMode mode;
-		AspectRatio ar;
-
-		SDL_GetDisplayMode(0, i, &mode);
-
-		ar = Utilities::GetAspectRatio(mode.w, mode.h);
-		if (ar != ASPECT_RATIO_UNKNOWN)
-		{
-			m_DisplayModes.push_back(mode);
-		}
-	}
 
 	LOG_INFO("Creating renderer...");
 	m_Renderer = SDL_CreateRenderer(m_Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -159,7 +160,11 @@ int Game::Run()
 					newScreen = currentScreen->HandleInput(&event);
 					if (newScreen)
 					{
-						currentScreen = newScreen;
+						//currentScreen = newScreen;
+						m_NewScreen = newScreen;
+						m_Fading = true;
+						m_ScreenSwitched = false;
+						m_FadingTimer = 0;
 					}
 					break;
 			}
@@ -183,6 +188,21 @@ int Game::Run()
 		}
 
 		m_EventBus.Proceed();
+
+		if (m_Fading)
+		{
+			m_FadingTimer += elapsed;
+			if (m_FadingTimer >= 200 && !m_ScreenSwitched)
+			{
+				currentScreen = m_NewScreen;
+				m_NewScreen = nullptr;
+				m_ScreenSwitched = true;
+			}
+			if (m_FadingTimer >= 400)
+			{
+				m_Fading = false;
+			}
+		}
 
 		/* render */
 		Render(currentScreen);
@@ -266,6 +286,29 @@ void Game::Render(GameScreen *screen)
 
 	screen->Render(m_Renderer);
 
+	if (m_Fading)
+	{
+		SDL_Rect r;
+		r.h = Globals::SCREEN_HEIGHT;
+		r.w = Globals::SCREEN_WIDTH;
+		r.x = r.y = 0;
+
+		float f = (float)m_FadingTimer / 400;
+		uint32_t alpha = 0;
+
+		if (f <= 0.5f)
+		{
+			alpha = (uint32_t)((2 * f) * 255);
+		}
+		else
+		{
+			alpha = (uint32_t)((1.f - f) * 255);
+		}
+
+		SDL_SetRenderDrawColor(m_Renderer, 0, 0, 0, alpha);
+		SDL_RenderFillRect(m_Renderer, &r);
+	}
+
 	SDL_RenderPresent(m_Renderer);
 }
 
@@ -288,7 +331,8 @@ bool Game::ReadSettings()
 
 			LOG_INFO("Reading \"screenw\" option");
 			u = Utilities::GetIniUintValue("common", "screenw", INT_MAX, COMMON_INI_PATH);
-			if (u == 0 || u == INT_MAX)
+			if (u == 0 || u == INT_MAX
+				|| ((int)u < m_DisplayModes.front().w || (int)u > m_DisplayModes.back().w))
 			{
 				LOG_WARN("Invalid syntax, fallback to defaults");
 				break;
@@ -297,7 +341,8 @@ bool Game::ReadSettings()
 
 			LOG_INFO("Reading \"screenh\" option");
 			u = Utilities::GetIniUintValue("common", "screenh", INT_MAX, COMMON_INI_PATH);
-			if (u == 0 || u == INT_MAX)
+			if (u == 0 || u == INT_MAX
+				|| ((int)u < m_DisplayModes.front().h || (int)u > m_DisplayModes.back().h))
 			{
 				LOG_WARN("Invalid syntax, fallback to defaults");
 				break;

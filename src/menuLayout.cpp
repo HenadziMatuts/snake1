@@ -5,7 +5,6 @@
 
 struct MenuButtonEvenHandlersData
 {
-	bool m_newGame;
 	bool *m_quit;
 };
 
@@ -36,7 +35,6 @@ static UILayout* MenuNewGameButtonEventHandler(SDL_Event *event, GameScreen **ne
 		{
 			case SDLK_RETURN:
 			case SDLK_SPACE:
-				data->m_newGame = true;
 				Globals::newGameLayout.Enter();
 				newLayout = &Globals::newGameLayout;
 				break;
@@ -102,6 +100,12 @@ static UILayout* MenuExitButtonEventHandler(SDL_Event *event, GameScreen **newSc
 	return nullptr;
 }
 
+void MenuLayout::Enter()
+{
+	WakeUp();
+	ResetTimer();
+}
+
 UILayout* MenuLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 {
 	UILayout *newLayout = nullptr;
@@ -113,7 +117,6 @@ UILayout* MenuLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 		switch (action = ProcessInput(event))
 		{
 			case MENU_ACTION_START_GAME:
-				SetPauseLayout(false);
 				Globals::newGameLayout.Enter();
 				newLayout = &Globals::newGameLayout;
 				break;
@@ -130,7 +133,7 @@ UILayout* MenuLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 			default:
 				break;
 		}
-		if (action != MENU_ACTION_NONE && !m_Quit)
+		if (action == MENU_ACTION_WAKE_UP)
 		{
 			WakeUp();
 			ResetTimer();
@@ -140,7 +143,7 @@ UILayout* MenuLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 	{
 		if (event->type == SDL_KEYUP)
 		{
-			MenuButtonEvenHandlersData userData = { false, &m_Quit };
+			MenuButtonEvenHandlersData userData = { &m_Quit };
 			m_WakeTime = 0;
 
 			switch (event->key.keysym.sym)
@@ -160,10 +163,6 @@ UILayout* MenuLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 
 				default:
 					newLayout = m_UIButton[m_SelectedButton].HandleInput(event, newScreen, (void*)&userData);
-					if (userData.m_newGame)
-					{
-						SetPauseLayout(false);
-					}
 					break;
 			}
 		}

@@ -121,13 +121,15 @@ void InGameLayout::Render(SDL_Renderer *renderer)
 		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xA0);
 		SDL_RenderFillRect(renderer, &r);
 
-		if (!m_UILabel[IN_GAME_UI_LABEL_DIE_MESSAGE].GetDimensions(&r))
+		if (Globals::ASPECT_RATIO == ASPECT_RATIO_16_9)
 		{
-			m_UILabel[IN_GAME_UI_LABEL_DIE_MESSAGE].Render(renderer);
-			m_UILabel[IN_GAME_UI_LABEL_DIE_MESSAGE].GetDimensions(&r);
-
-			m_DialogFrame.w = r.w + (r.w / 8);
-			m_DialogFrame.x = r.x - (r.w / 16);
+			m_DialogFrame.w = Globals::SCREEN_WIDTH / 2;
+			m_DialogFrame.x = Globals::SCREEN_WIDTH / 4;
+		}
+		else
+		{
+			m_DialogFrame.w = (Globals::SCREEN_WIDTH * 2) / 3;
+			m_DialogFrame.x = Globals::SCREEN_WIDTH / 6;
 		}
 
 		SDL_Color dialogc = Globals::COLOR_SCHEME->m_DialogBox;
@@ -171,9 +173,6 @@ bool InGameLayout::CreateLayout(SDL_Renderer *renderer)
 	SDL_Rect dim;
 	m_UILabel[IN_GAME_UI_LABEL_DIE_MESSAGE].GetDimensions(&dim);
 
-	m_DialogFrame.w = dim.w + (dim.w / 8);
-	m_DialogFrame.x = dim.x - (dim.w / 16);
-	
 	return true;
 }
 

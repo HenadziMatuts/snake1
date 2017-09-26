@@ -13,6 +13,7 @@ static UILayout* ProfileBackButtonEventHandler(SDL_Event *event, GameScreen **ne
 		{
 			case SDLK_RETURN:
 			case SDLK_SPACE:
+				Globals::menuLayout.Enter();
 				newLayout = &Globals::menuLayout;
 				break;
 			}
@@ -40,8 +41,11 @@ UILayout* ProfileLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 			case SDLK_DOWN:
 				m_UIButton[m_SelectedButton].Select(false);
 
-				m_SelectedButton = (ProfileUIButton)Utilities::ModuloSum(m_SelectedButton,
-					event->key.keysym.sym == SDLK_UP ? -1 : 1, PROFILE_UI_BUTTON_TOTAL);
+				do
+				{
+					m_SelectedButton = (ProfileUIButton)Utilities::ModuloSum(m_SelectedButton,
+						event->key.keysym.sym == SDLK_UP ? -1 : 1, PROFILE_UI_BUTTON_TOTAL);
+				} while (!m_UIButton[m_SelectedButton].IsVisible());
 
 				m_UIButton[m_SelectedButton].Select(true);
 				break;
@@ -87,17 +91,6 @@ bool ProfileLayout::CreateLayout(SDL_Renderer *renderer)
 		return false;
 	}
 
-	for (int i = PROFILE_UI_LABEL_TITLE + 1, j = 0; i <= PROFILE_UI_LABEL_PROFILE_NO; i++, j++)
-	{
-		char no[3];
-		sprintf_s(no, "%d:", j + 1);
-
-		if (!m_UILabel[i].Create(no, font, textc, renderer, 0.3f, 0.3f + (0.1f * j), true, 0.45f, TEXT_ANCHOR_MID_LEFT))
-		{
-			return false;
-		}
-	}
-
 	if (!m_UIButton[PROFILE_UI_BUTTON_BACK].Create("back", font, textc, selectorc,
 		renderer, 0.5f, 0.875f, true, ProfileBackButtonEventHandler, 0.55f))
 	{
@@ -107,7 +100,7 @@ bool ProfileLayout::CreateLayout(SDL_Renderer *renderer)
 	for (int i = PROFILE_UI_BUTTON_BACK + 1, j = 0; i <= PROFILE_UI_BUTTON_PROFILE; i++, j++)
 	{
 		if (!m_UIButton[i].Create("new profile", font, textc, selectorc,
-			renderer, 0.5f, 0.3f + (0.1f * j), true, nullptr, 0.45f))
+			renderer, 0.5f, 0.3f + (0.1f * j), j == 0 ? true : false, nullptr, 0.45f))
 		{
 			return false;
 		}

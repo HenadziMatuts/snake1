@@ -48,7 +48,10 @@ public:
 private:
 	Game() :
 		m_Window(nullptr),
-		m_Renderer(nullptr)
+		m_Renderer(nullptr),
+		m_FadingTimer(0),
+		m_Fading(false),
+		m_ScreenSwitched(true)
 	{};
 
 	/* rendering subsystem */
@@ -81,4 +84,11 @@ private:
 	 * Deinitilize subsystems and quit.
 	 */
 	int Quit();
+
+	/* screems crossfading */
+	bool m_Fading;
+	uint32_t m_FadingTimer;
+
+	GameScreen *m_NewScreen;
+	bool m_ScreenSwitched;
 };
