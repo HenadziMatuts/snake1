@@ -108,7 +108,7 @@ void MenuScreen::Render(SDL_Renderer *renderer)
 		}
 		else
 		{
-			alpha = (uint32_t)((1.f - f) * 255);
+			alpha = (uint32_t)((1.f - f) * 510);
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, alpha);

@@ -160,7 +160,6 @@ int Game::Run()
 					newScreen = currentScreen->HandleInput(&event);
 					if (newScreen)
 					{
-						//currentScreen = newScreen;
 						m_NewScreen = newScreen;
 						m_Fading = true;
 						m_ScreenSwitched = false;
@@ -218,6 +217,7 @@ bool Game::RebuidUI()
 
 	if (!Globals::menuLayout.CreateLayout(m_Renderer)
 		|| !Globals::inGameLayout.CreateLayout(m_Renderer)
+		|| !Globals::gameOverLayout.CreateLayout(m_Renderer)
 		|| !Globals::settingsLayout.CreateLayout(m_Renderer)
 		|| !Globals::newGameLayout.CreateLayout(m_Renderer)
 		|| !Globals::profileLayout.CreateLayout(m_Renderer))
@@ -302,7 +302,7 @@ void Game::Render(GameScreen *screen)
 		}
 		else
 		{
-			alpha = (uint32_t)((1.f - f) * 255);
+			alpha = (uint32_t)((1.f - f) * 510);
 		}
 
 		SDL_SetRenderDrawColor(m_Renderer, 0, 0, 0, alpha);
@@ -431,6 +431,7 @@ int Game::Quit()
 	/* Destroy layouts */
 	Globals::menuLayout.DestroyLayout();
 	Globals::inGameLayout.DestroyLayout();
+	Globals::gameOverLayout.DestroyLayout();
 	Globals::settingsLayout.DestroyLayout();
 	Globals::newGameLayout.DestroyLayout();
 	Globals::profileLayout.DestroyLayout();

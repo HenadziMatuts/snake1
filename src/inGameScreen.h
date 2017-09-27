@@ -70,4 +70,13 @@ private:
 	Scoreboard m_Scoreboard;
 
 	void Restart();
+
+	bool m_ShouldRestart;
+
+	/* layouts crossfading */
+	bool m_Fading;
+	uint32_t m_FadingTimer;
+
+	UILayout *m_NewLayout;
+	bool m_LayoutSwitched;
 };

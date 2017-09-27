@@ -31,6 +31,7 @@ InGameScreen Globals::inGameScreen;
 
 MenuLayout Globals::menuLayout;
 InGameLayout Globals::inGameLayout;
+GameOverLayout Globals::gameOverLayout;
 SettingsLayout Globals::settingsLayout;
 NewGameLayout Globals::newGameLayout;
 ProfileLayout Globals::profileLayout;

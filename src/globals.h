@@ -5,6 +5,7 @@
 #include "profileLayout.h"
 #include "inGameScreen.h"
 #include "inGameLayout.h"
+#include "gameOverLayout.h"
 #include "newGameLayout.h"
 #include "colorScheme.h"
 #include <cstdint>
@@ -48,6 +49,7 @@ namespace Globals
 
 	extern MenuLayout menuLayout;
 	extern InGameLayout inGameLayout;
+	extern GameOverLayout gameOverLayout;
 	extern NewGameLayout newGameLayout;
 	extern SettingsLayout settingsLayout;
 	extern ProfileLayout profileLayout;

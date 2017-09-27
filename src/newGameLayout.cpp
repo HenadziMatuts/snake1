@@ -19,7 +19,7 @@ static UILayout* NewGameStartButtonEventHandler(SDL_Event *event, GameScreen **n
 				Globals::BODY_SIZE = settings->m_BodySize;
 				Globals::BORDERLESS = settings->m_IsBorderless;
 
-				Globals::inGameScreen.Enter(GAME_EVENT_RESTART);
+				Globals::inGameScreen.Enter(GAME_EVENT_START);
 				*newScreen = &Globals::inGameScreen;
 
 				break;

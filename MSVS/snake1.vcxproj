@@ -24,6 +24,7 @@
     <ClCompile Include="..\src\game.cpp" />
     <ClCompile Include="..\src\gameField.cpp" />
     <ClCompile Include="..\src\globals.cpp" />
+    <ClCompile Include="..\src\gameOverLayout.cpp" />
     <ClCompile Include="..\src\inGameLayout.cpp" />
     <ClCompile Include="..\src\inGameScreen.cpp" />
     <ClCompile Include="..\src\main.cpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="..\src\gameField.h" />
     <ClInclude Include="..\src\gameScreen.h" />
     <ClInclude Include="..\src\globals.h" />
+    <ClInclude Include="..\src\gameOverLayout.h" />
     <ClInclude Include="..\src\inGameLayout.h" />
     <ClInclude Include="..\src\inGameScreen.h" />
     <ClInclude Include="..\src\menuLayout.h" />
