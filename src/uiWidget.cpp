@@ -236,13 +236,22 @@ bool UIButton::Create(char *text, TTF_Font *font, SDL_Color *rgbaText, SDL_Color
 	m_Selector.x -= minx * 2;
 	m_Selector.w += (minx * 4) - (minx / 2);
 
+	m_Font = nullptr;
 	strcpy_s(m_Text, text);
+	m_X = x;
+	m_Y = y;
+	m_Anchor = anchor;
+	m_ScaleFactor = scaleFactor;
+
+	m_TextColor = *rgbaText;
 	m_SelectorColor = *rgbaSelector;
 
 	m_IsVisible = isVisible;
 	m_IsSelected = false;
 	m_EventHandler = eventHandler;
 	
+	m_TextChanged = false;
+
 	return true;
 }
 
@@ -253,6 +262,21 @@ UILayout* UIButton::HandleInput(SDL_Event *event, GameScreen **newScreen, void *
 
 void UIButton::Render(SDL_Renderer *renderer)
 {
+	if (m_TextChanged)
+	{
+		bool isSelected = this->IsSelected();
+
+		if (!this->Create(m_Text, m_Font, &m_TextColor, &m_SelectorColor,
+			renderer, m_X, m_Y, m_IsVisible, m_EventHandler, m_ScaleFactor, m_Anchor))
+		{
+			LOG_ERR("failed changing label texture");
+		}
+
+		m_Font = nullptr;
+		m_TextChanged = false;
+
+		this->Select(isSelected);
+	}
 	if (m_IsVisible)
 	{
 		if (m_IsSelected)
@@ -263,6 +287,20 @@ void UIButton::Render(SDL_Renderer *renderer)
 		}
 
 		m_Texture.Render(renderer, &m_Dimensions);
+	}
+}
+
+void UIButton::SetText(char *text, TTF_Font *font)
+{
+	if (strcmp(text, m_Text))
+	{
+		if (strcpy_s(m_Text, text))
+		{
+			LOG_ERR("strcpy_s error");
+			return;
+		}
+		m_Font = font;
+		m_TextChanged = true;
 	}
 }
 

@@ -83,6 +83,7 @@ public:
 	UILayout* HandleInput(SDL_Event *event, GameScreen **newScreen, void *userData);
 	void Render(SDL_Renderer *renderer);
 
+	void SetText(char *text, TTF_Font *font);
 	void SetVisibility(bool isVisible);
 	bool IsVisible();
 	void Select(bool isSelected);
@@ -91,13 +92,21 @@ public:
 private:
 	Texture m_Texture;
 
+	TTF_Font *m_Font;
 	char m_Text[128];
+	SDL_Color m_TextColor;
 	SDL_Color m_SelectorColor;
+
+	float m_X, m_Y;
+	TextAnchor m_Anchor;
 
 	bool m_IsVisible;
 	bool m_IsSelected;
 	SDL_Rect m_Dimensions;
 	SDL_Rect m_Selector;
+	float m_ScaleFactor;
+
+	bool m_TextChanged;
 
 	pfnButtonEventHandler m_EventHandler;
 };

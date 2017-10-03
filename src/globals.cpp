@@ -26,10 +26,15 @@ bool Globals::BORDERLESS = true;
 bool Globals::SMOOTH_MOVEMENT = true;
 ColorScheme *Globals::COLOR_SCHEME = &DEFAULT_COLOR_SCHEME;
 
+char Globals::USER_PROFILE[5][21] = {
+	"\0", "\0", "\0", "\0", "\0"
+};
+
 MenuScreen Globals::menuScreen;
 InGameScreen Globals::inGameScreen;
 
 MenuLayout Globals::menuLayout;
+SleepingMenuLayout Globals::sleepingMenuLayout;
 InGameLayout Globals::inGameLayout;
 GameOverLayout Globals::gameOverLayout;
 SettingsLayout Globals::settingsLayout;

@@ -18,6 +18,8 @@ public:
 
 	void Resize();
 
+	void ChangeLayout(UILayout *newLayout);
+
 private:
 	UILayout *m_CurrentLayout;
 	GameField m_Demo;

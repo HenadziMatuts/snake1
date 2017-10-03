@@ -216,6 +216,7 @@ bool Game::RebuidUI()
 	Globals::ASPECT_RATIO = Utilities::GetAspectRatio(Globals::SCREEN_WIDTH, Globals::SCREEN_HEIGHT);
 
 	if (!Globals::menuLayout.CreateLayout(m_Renderer)
+		|| !Globals::sleepingMenuLayout.CreateLayout(m_Renderer)
 		|| !Globals::inGameLayout.CreateLayout(m_Renderer)
 		|| !Globals::gameOverLayout.CreateLayout(m_Renderer)
 		|| !Globals::settingsLayout.CreateLayout(m_Renderer)
@@ -430,6 +431,7 @@ int Game::Quit()
 
 	/* Destroy layouts */
 	Globals::menuLayout.DestroyLayout();
+	Globals::sleepingMenuLayout.DestroyLayout();
 	Globals::inGameLayout.DestroyLayout();
 	Globals::gameOverLayout.DestroyLayout();
 	Globals::settingsLayout.DestroyLayout();

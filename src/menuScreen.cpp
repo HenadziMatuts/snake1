@@ -9,7 +9,7 @@ MenuScreen::MenuScreen()
 	m_LayoutSwitched = true;
 	m_FadingTimer = 0;
 
-	m_CurrentLayout = &Globals::menuLayout;
+	m_CurrentLayout = &Globals::sleepingMenuLayout;
 	m_Demo.Initilaize(HandleInputDemo, HandleCollisionsDemo, RenderDemo, true,
 		(uint32_t)(50 * (Globals::ASPECT_RATIO == ASPECT_RATIO_4_3 ? 1.33f : 1.78f)), 50,
 		30, 10, true);
@@ -122,4 +122,13 @@ void MenuScreen::Resize()
 		(Globals::ASPECT_RATIO == ASPECT_RATIO_4_3 ? 1.33f : 1.78f)),
 		50, true, false);
 	m_Demo.Reset();
+}
+
+void MenuScreen::ChangeLayout(UILayout *newLayout)
+{
+	m_NewLayout = newLayout;
+
+	m_Fading = true;
+	m_LayoutSwitched = false;
+	m_FadingTimer = 0;
 }

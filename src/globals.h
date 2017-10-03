@@ -1,5 +1,6 @@
 #pragma once
 #include "menuScreen.h"
+#include "sleepingMenuLayout.h"
 #include "menuLayout.h"
 #include "settingsLayout.h"
 #include "profileLayout.h"
@@ -40,14 +41,18 @@ namespace Globals
 	extern int BODY_SIZE;
 	extern bool BORDERLESS;
 
-	/*settings*/
+	/* settings */
 	extern bool SMOOTH_MOVEMENT;
 	extern ColorScheme *COLOR_SCHEME;
+
+	/* user profiles */
+	extern char USER_PROFILE[5][21];
 
 	extern MenuScreen menuScreen;
 	extern InGameScreen inGameScreen;
 
 	extern MenuLayout menuLayout;
+	extern SleepingMenuLayout sleepingMenuLayout;
 	extern InGameLayout inGameLayout;
 	extern GameOverLayout gameOverLayout;
 	extern NewGameLayout newGameLayout;
