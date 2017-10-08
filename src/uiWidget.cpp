@@ -212,23 +212,8 @@ bool UIButton::Create(char *text, TTF_Font *font, SDL_Color *rgbaText, SDL_Color
 
 	m_Selector = m_Dimensions;
 
-	if (strchr(text, 'g') || strchr(text, 'p')
-		|| strchr(text, 'q') || strchr(text, 'y'))
-	{
-		m_Selector.h += (m_Dimensions.h / 8);
-	}
-	if (strchr(text, 'b') || strchr(text, 'd') || strchr(text, 'f')
-		|| strchr(text, 'h') || strchr(text, 'i') || strchr(text, 'k')
-		|| strchr(text, 'l') || strchr(text, 't'))
-	{
-		m_Selector.y -= (m_Dimensions.h / 8);
-		m_Selector.h += (m_Dimensions.h / 8);
-	}
-	if (strchr(text, 'j'))
-	{
-		m_Selector.y -= (m_Dimensions.h / 8);
-		m_Selector.h += (m_Dimensions.h / 4);
-	}
+	m_Selector.y -= (m_Dimensions.h / 8);
+	m_Selector.h += (m_Dimensions.h / 4);
 
 	int minx = 0;
 	TTF_GlyphMetrics(font, text[strlen(text)],

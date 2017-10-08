@@ -173,8 +173,11 @@ UILayout* SettingsLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 			case SDLK_DOWN:
 				m_UIButton[m_SelectedButton].Select(false);
 
-				m_SelectedButton = (SettingsUIButton)Utilities::ModuloSum(m_SelectedButton,
-					event->key.keysym.sym == SDLK_UP ? -1 : 1, SETTINGS_UI_BUTTON_TOTAL);
+				do
+				{
+					m_SelectedButton = (SettingsUIButton)Utilities::ModuloSum(m_SelectedButton,
+						event->key.keysym.sym == SDLK_UP ? -1 : 1, SETTINGS_UI_BUTTON_TOTAL);
+				} while (!m_UIButton[m_SelectedButton].IsVisible());
 
 				m_UIButton[m_SelectedButton].Select(true);
 				break;

@@ -45,9 +45,6 @@ namespace Globals
 	extern bool SMOOTH_MOVEMENT;
 	extern ColorScheme *COLOR_SCHEME;
 
-	/* user profiles */
-	extern char USER_PROFILE[5][21];
-
 	extern MenuScreen menuScreen;
 	extern InGameScreen inGameScreen;
 

@@ -1,8 +1,7 @@
 #pragma once
 #include "uiLayout.h"
 #include "uiWidget.h"
-
-const uint32_t MAX_PROFILES = 5;
+#include "profileManager.h"
 
 enum ProfileUILabel {
 	PROFILE_UI_LABEL_TITLE = 0,
@@ -12,7 +11,7 @@ enum ProfileUILabel {
 enum ProfileUIButton {
 	PROFILE_UI_BUTTON_BACK = 0,
 	PROFILE_UI_BUTTON_FIRST_PROFILE = 1,
-	PROFILE_UI_BUTTON_LAST_PROFILE = PROFILE_UI_BUTTON_BACK + MAX_PROFILES,
+	PROFILE_UI_BUTTON_LAST_PROFILE = PROFILE_UI_BUTTON_BACK + TOTAL_PROFILES,
 	PROFILE_UI_BUTTON_TOTAL
 };
 
@@ -38,5 +37,5 @@ private:
 	ProfileUIButton m_SelectedButton;
 
 	bool m_IsTextInputActive;
-	char m_Input[21];
+	char m_Input[MAX_PROFILE_NAME_SIZE];
 };

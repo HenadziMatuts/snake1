@@ -16,9 +16,14 @@ public:
 	void UnloadResources();
 
 	/**
-	* Returns font.
-	*/
+	 * Returns font.
+	 */
 	TTF_Font* GetFont();
+
+	/**
+	 *
+	 */
+	ColorScheme* FindColorScheme(char *name);
 
 private:
 	bool LoadFont();

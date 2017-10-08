@@ -50,6 +50,24 @@ TTF_Font* ResourceManager::GetFont()
 	return m_Font;
 }
 
+ColorScheme* ResourceManager::FindColorScheme(char *name)
+{
+	ColorScheme *curr = m_ColorSchemes->m_Head;
+
+	do
+	{
+		if (!strcmp(curr->m_Name, name))
+		{
+			return curr;
+		}
+
+		curr = curr->m_NextScheme;
+
+	} while (curr->m_NextScheme != curr->m_Head);
+
+	return strcmp(curr->m_Name, name) ? nullptr : curr;
+}
+
 bool ResourceManager::LoadFont()
 {
 	m_Font = TTF_OpenFont(PATH_FONT, 60);

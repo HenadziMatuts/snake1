@@ -28,6 +28,11 @@ EventBus& Game::Events()
 	return m_EventBus;
 }
 
+ProfileManager& Game::Profiles()
+{
+	return m_ProfileManager;
+}
+
 void Game::Initialize()
 {
 	LOG_INFO("Initializing SDL...");
@@ -315,20 +320,30 @@ void Game::Render(GameScreen *screen)
 
 bool Game::ReadSettings()
 {
+	char scheme[32];
+
 	if (Utilities::FileExists(COMMON_INI_PATH))
 	{
 		while (1)
 		{
 			uint32_t u = 0;
 
-			LOG_INFO("Reading \"fullscreen\" option");
-			u = Utilities::GetIniUintValue("common", "fullscreen", INT_MAX, COMMON_INI_PATH);
+			LOG_INFO("Reading \"smooth_movement\" option");
+			u = Utilities::GetIniUintValue("common", "smooth_movement", INT_MAX, COMMON_INI_PATH);
 			if (u > 1)
 			{
 				LOG_WARN("Invalid syntax, fallback to defaults");
 				break;
 			}
-			Globals::FULLSCREEN = (u == 0) ? false : true;
+			Globals::SMOOTH_MOVEMENT = (u == 0) ? false : true;
+
+			LOG_INFO("Reading \"color_scheme\" option");
+			Utilities::GetIniStringValue("common", "color_scheme", "classic grey", scheme, 32, COMMON_INI_PATH);
+			if (!(Globals::COLOR_SCHEME = Resources().FindColorScheme(scheme)))
+			{
+				LOG_WARN("No \"%s\" color scheme found, fallback to default", scheme);
+				Globals::COLOR_SCHEME = &DEFAULT_COLOR_SCHEME;
+			}
 
 			LOG_INFO("Reading \"screenw\" option");
 			u = Utilities::GetIniUintValue("common", "screenw", INT_MAX, COMMON_INI_PATH);
@@ -350,6 +365,15 @@ bool Game::ReadSettings()
 			}
 			Globals::SCREEN_HEIGHT = u;
 
+			LOG_INFO("Reading \"fullscreen\" option");
+			u = Utilities::GetIniUintValue("common", "fullscreen", INT_MAX, COMMON_INI_PATH);
+			if (u > 1)
+			{
+				LOG_WARN("Invalid syntax, fallback to defaults");
+				break;
+			}
+			Globals::FULLSCREEN = (u == 0) ? false : true;
+
 			return true;
 		}
 	}
@@ -361,6 +385,8 @@ bool Game::ReadSettings()
 	SDL_DisplayMode mode;
 	SDL_GetCurrentDisplayMode(0, &mode);
 
+	Globals::SMOOTH_MOVEMENT = true;
+	Globals::COLOR_SCHEME = &DEFAULT_COLOR_SCHEME;
 	Globals::FULLSCREEN = true;
 	Globals::SCREEN_WIDTH = mode.w;
 	Globals::SCREEN_HEIGHT = mode.h;
@@ -370,6 +396,8 @@ bool Game::ReadSettings()
 
 bool Game::StoreSettings()
 {
+	char num[5];
+
 	/* create settings file if it is not exists */
 	if (!Utilities::FileExists(COMMON_INI_PATH))
 	{
@@ -397,14 +425,20 @@ bool Game::StoreSettings()
 		LOG_ERR("Failed writing \"common\" section in \"%s\" file",  COMMON_INI_PATH);
 		return false;
 	}
-	if (!Utilities::WriteIniString("common", "fullscreen",
-		Globals::FULLSCREEN ? "1" : "0", COMMON_INI_PATH))
+
+	if (!Utilities::WriteIniString("common", "smooth_movement",
+		Globals::SMOOTH_MOVEMENT ? "1" : "0", COMMON_INI_PATH))
 	{
-		LOG_ERR("Failed writing \"fullscreen\" value in \"%s\" file", COMMON_INI_PATH);
+		LOG_ERR("Failed writing \"smooth_movement\" value in \"%s\" file", COMMON_INI_PATH);
 		return false;
 	}
 
-	char num[5];
+	if (!Utilities::WriteIniString("common", "color_scheme",
+		Globals::COLOR_SCHEME->m_Name, COMMON_INI_PATH))
+	{
+		LOG_ERR("Failed writing \"color_scheme\" value in \"%s\" file", COMMON_INI_PATH);
+		return false;
+	}
 
 	_itoa_s(Globals::SCREEN_WIDTH, num, 10);
 	if (!Utilities::WriteIniString("common", "screenw", num, COMMON_INI_PATH))
@@ -416,6 +450,13 @@ bool Game::StoreSettings()
 	if (!Utilities::WriteIniString("common", "screenh", num, COMMON_INI_PATH))
 	{
 		LOG_ERR("Failed writing \"screenh\" value in \"%s\" file", COMMON_INI_PATH);
+		return false;
+	}
+
+	if (!Utilities::WriteIniString("common", "fullscreen",
+		Globals::FULLSCREEN ? "1" : "0", COMMON_INI_PATH))
+	{
+		LOG_ERR("Failed writing \"fullscreen\" value in \"%s\" file", COMMON_INI_PATH);
 		return false;
 	}
 

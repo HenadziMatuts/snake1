@@ -6,7 +6,7 @@
 struct ProfileEntryButtonData
 {
 	bool *m_isTextInputActive;
-	char *m_profileData;
+	int m_slot;
 	char *m_input;
 	UIButton *m_this;
 };
@@ -35,7 +35,8 @@ static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **n
 	UILayout *newLayout = nullptr;
 	ProfileEntryButtonData *data = (ProfileEntryButtonData*)userData;
 	TTF_Font *font = Game::Instance().Resources().GetFont();
-	char temp[22] = "\0";
+	ProfileManager *profiles = &Game::Instance().Profiles();
+	char temp[MAX_PROFILE_NAME_SIZE + 1] = "\0";
 
 	if (*data->m_isTextInputActive)
 	{
@@ -44,13 +45,15 @@ static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **n
 			switch (event->key.keysym.sym)
 			{
 				case SDLK_ESCAPE:
-					memset(data->m_input, 0, 21);
+					memset(data->m_input, 0, MAX_PROFILE_NAME_SIZE);
 				case SDLK_RETURN:
-					data->m_input[20] = '\0';
-
-					strcpy_s(data->m_profileData, 21, data->m_input);
-					data->m_this->SetText(*data->m_profileData ? data->m_profileData : "new profile", font);
-
+					data->m_input[MAX_PROFILE_NAME_SIZE - 1] = '\0';
+					
+					if (strlen(data->m_input))
+					{
+						profiles->CreateProfile(data->m_input);
+					}
+					
 					*data->m_isTextInputActive = false;
 					SDL_StopTextInput();
 					break;
@@ -68,10 +71,10 @@ static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **n
 		}
 		else
 		{
-			if (strlen(data->m_input) < 20)
+			if (strlen(data->m_input) < MAX_PROFILE_NAME_SIZE - 1)
 			{
 				char c = SDL_tolower(event->text.text[0]);
-				sprintf_s(data->m_input, 21, "%s%c", data->m_input, c);
+				sprintf_s(data->m_input, MAX_PROFILE_NAME_SIZE, "%s%c", data->m_input, c);
 
 				sprintf_s(temp, "%s_", data->m_input);
 				data->m_this->SetText(temp, font);
@@ -86,14 +89,18 @@ static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **n
 			{
 				case SDLK_RETURN:
 				case SDLK_SPACE:
-					if (*data->m_profileData == '\0')
+					if (!profiles->IsProfileActive(data->m_slot))
 					{
 						SDL_StartTextInput();
 						*data->m_isTextInputActive = true;
 
-						memset(data->m_input, 0, 21);
+						memset(data->m_input, 0, MAX_PROFILE_NAME_SIZE);
 
 						data->m_this->SetText("_", font);
+					}
+					else
+					{
+						profiles->DeleteProfile(data->m_slot);
 					}
 					break;
 				}
@@ -144,7 +151,7 @@ UILayout* ProfileLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 				}
 			default:
 				userData.m_isTextInputActive = &m_IsTextInputActive;
-				userData.m_profileData = Globals::USER_PROFILE[m_SelectedButton - PROFILE_UI_BUTTON_FIRST_PROFILE];
+				userData.m_slot = m_SelectedButton - PROFILE_UI_BUTTON_FIRST_PROFILE;
 				userData.m_input = m_Input;
 				userData.m_this = &m_UIButton[m_SelectedButton];
 
@@ -158,10 +165,14 @@ UILayout* ProfileLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 
 GameEvent ProfileLayout::Update(uint32_t elapsed)
 {
+	TTF_Font *font = Game::Instance().Resources().GetFont();
+	ProfileManager *profiles = &Game::Instance().Profiles();
+	char *buttonLabel = nullptr;
+
 	for (int i = PROFILE_UI_BUTTON_FIRST_PROFILE, j = 0; i <= PROFILE_UI_BUTTON_LAST_PROFILE; i++, j++)
 	{
-		if ((j > 0) && (*Globals::USER_PROFILE[j] == '\0')
-			&& (*Globals::USER_PROFILE[j - 1] == '\0'))
+		if ((j > 0) && !profiles->IsProfileActive(j)
+			&& !profiles->IsProfileActive(j - 1))
 		{
 			m_UIButton[i].SetVisibility(false);
 			m_UIButton[i].Select(false);
@@ -170,6 +181,13 @@ GameEvent ProfileLayout::Update(uint32_t elapsed)
 		{
 			m_UIButton[i].SetVisibility(true);
 		}
+
+		if (!m_IsTextInputActive)
+		{
+			buttonLabel = profiles->GetProfielName(j);
+			m_UIButton[i].SetText(*buttonLabel ? buttonLabel : "new profile", font);
+		}
+
 	}
 
 	if (!m_UIButton[m_SelectedButton].IsVisible())
@@ -203,10 +221,11 @@ void ProfileLayout::Render(SDL_Renderer *renderer)
 bool ProfileLayout::CreateLayout(SDL_Renderer *renderer)
 {
 	TTF_Font *font = Game::Instance().Resources().GetFont();
+	ProfileManager *profiles = &Game::Instance().Profiles();
 	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
 	SDL_Color *selectorc = &Globals::COLOR_SCHEME->m_ButtonSelector;
 
-	if (!m_UILabel[PROFILE_UI_LABEL_TITLE].Create("profile selection", font, textc, renderer, 0.5f, 0.125f, true, 0.75f))
+	if (!m_UILabel[PROFILE_UI_LABEL_TITLE].Create("profile management", font, textc, renderer, 0.5f, 0.125f, true, 0.75f))
 	{
 		return false;
 	}
@@ -220,12 +239,13 @@ bool ProfileLayout::CreateLayout(SDL_Renderer *renderer)
 	for (int i = PROFILE_UI_BUTTON_FIRST_PROFILE, j = 0; i <= PROFILE_UI_BUTTON_LAST_PROFILE; i++, j++)
 	{
 		char profile[21] = "\0";
-		strcpy_s(profile, (*Globals::USER_PROFILE[j] == '\0') ?
-			"new profile" : Globals::USER_PROFILE[j]);
+
+		strcpy_s(profile, profiles->IsProfileActive(j) ?
+			profiles->GetProfielName(j) : "new profile");
 
 		bool visible = true;
-		if ((j > 0) && (*Globals::USER_PROFILE[j] == '\0')
-			&& (*Globals::USER_PROFILE[j - 1] == '\0'))
+		if ((j > 0) && !profiles->IsProfileActive(j)
+			&& !profiles->IsProfileActive(j - 1))
 		{
 			visible = false;
 		}

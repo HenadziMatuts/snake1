@@ -139,6 +139,9 @@ UILayout* MenuLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 
 GameEvent MenuLayout::Update(uint32_t elapsed)
 {
+	TTF_Font *font = Game::Instance().Resources().GetFont();
+	ProfileManager *profiles = &Game::Instance().Profiles();
+
 	if (m_Quit)
 	{
 		Game::Instance().Events().PostGameEvent(GAME_EVENT_QUIT);
@@ -156,6 +159,9 @@ GameEvent MenuLayout::Update(uint32_t elapsed)
 
 		m_UIButton[m_SelectedButton].Select(true);
 	}
+
+	char *profileButtonLabel = profiles->GetCurrentProfileName();
+	m_UIButton[MENU_UI_BUTTON_PROFILE].SetText(profileButtonLabel ? profileButtonLabel : "create profile", font);
 
 	if ((m_Timer += elapsed) >= 5000)
 	{
@@ -203,7 +209,7 @@ bool MenuLayout::CreateLayout(SDL_Renderer *renderer)
 		x, 0.17f, false, MenuResumeButtonEventHandler, 0.42f)
 		|| !m_UIButton[MENU_UI_BUTTON_NEW_GAME].Create("new game", font, textc, selectorc, renderer,
 			x, 0.28f, true, MenuNewGameButtonEventHandler, 0.42f)
-		|| !m_UIButton[MENU_UI_BUTTON_PROFILE].Create("profile", font, textc, selectorc, renderer,
+		|| !m_UIButton[MENU_UI_BUTTON_PROFILE].Create("create profile", font, textc, selectorc, renderer,
 			x, 0.39f, true, MenuProfileButtonEventHandler, 0.42f)
 		|| !m_UIButton[MENU_UI_BUTTON_HIGH_SCORES].Create("high scores", font, textc, selectorc, renderer,
 			x, 0.50f, true, nullptr, 0.42f)
