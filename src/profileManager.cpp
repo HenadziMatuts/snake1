@@ -66,6 +66,12 @@ void ProfileManager::DeleteProfile(int slot)
 			UserProfile swap = m_Profiles[j];
 			m_Profiles[j] = m_Profiles[i];
 			m_Profiles[i] = swap;
+
+			if (!m_CurrentProfile)
+			{
+				m_CurrentProfile = &m_Profiles[i];
+			}
+
 			break;
 		}
 	}
@@ -118,6 +124,28 @@ void ProfileManager::DeleteCurrentProfile()
 		if (m_CurrentProfile == &m_Profiles[i])
 		{
 			DeleteProfile(i);
+			break;
+		}
+	}
+}
+
+void ProfileManager::NextProfile()
+{
+	for (int i = 0; i < TOTAL_PROFILES; i++)
+	{
+		if (m_CurrentProfile == &m_Profiles[i])
+		{
+			uint32_t j = Utilities::ModuloSum(i, 1, TOTAL_PROFILES);
+
+			if (m_Profiles[j].m_IsActive)
+			{
+				m_CurrentProfile = &m_Profiles[j];
+			}
+			else
+			{
+				m_CurrentProfile = &m_Profiles[0];
+			}
+
 			break;
 		}
 	}

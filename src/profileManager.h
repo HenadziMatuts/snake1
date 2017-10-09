@@ -47,6 +47,11 @@ public:
 	 */
 	void DeleteCurrentProfile();
 
+	/**
+	 *
+	 */
+	void NextProfile();
+
 private:
 	UserProfile *m_CurrentProfile;
 

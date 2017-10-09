@@ -125,6 +125,25 @@ static UILayout* ProfileDeleteButtonEventHandler(SDL_Event *event, GameScreen **
 	return newLayout;
 }
 
+static UILayout* ProfileSwitchButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
+{
+	UILayout *newLayout = nullptr;
+
+	if (event->type == SDL_KEYUP)
+	{
+		switch (event->key.keysym.sym)
+		{
+			case SDLK_RETURN:
+			case SDLK_SPACE:
+				Game::Instance().Profiles().NextProfile();
+				newLayout = &Globals::profileLayout;
+				break;
+		}
+	}
+
+	return newLayout;
+}
+
 void ProfileLayout::Enter()
 {
 	m_UIButton[m_SelectedButton].Select(false);
@@ -251,7 +270,7 @@ bool ProfileLayout::CreateLayout(SDL_Renderer *renderer)
 	if (!m_UIButton[PROFILE_UI_BUTTON_BACK].Create("back to menu", font, textc, selectorc,
 		renderer, 0.5f, 0.875f, true, ProfileBackButtonEventHandler, 0.55f)
 		|| !m_UIButton[PROFILE_UI_BUTTON_CHANGE].Create("switch", font, textc, selectorc,
-			renderer, 0.5f, 0.375f, false, nullptr, 0.45f)
+			renderer, 0.5f, 0.375f, false, ProfileSwitchButtonEventHandler, 0.45f)
 		|| !m_UIButton[PROFILE_UI_BUTTON_NEW].Create("create", font, textc, selectorc,
 			renderer, 0.5f, 0.5f, true, ProfileCreateButtonEventHandler, 0.45f)
 		|| !m_UIButton[PROFILE_UI_BUTTON_DELETE].Create("delete", font, textc, selectorc,
