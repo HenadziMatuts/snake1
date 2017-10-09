@@ -37,6 +37,16 @@ public:
 	 */
 	char* GetCurrentProfileName();
 
+	/**
+	 *
+	 */
+	bool HasFreeSlot();
+
+	/**
+	 *
+	 */
+	void DeleteCurrentProfile();
+
 private:
 	UserProfile *m_CurrentProfile;
 

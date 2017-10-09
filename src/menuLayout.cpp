@@ -194,7 +194,7 @@ bool MenuLayout::CreateLayout(SDL_Renderer *renderer)
 	SDL_Color *selectorc = &Globals::COLOR_SCHEME->m_ButtonSelector;
 	bool is4_3 = Globals::ASPECT_RATIO == ASPECT_RATIO_4_3;
 	
-	float x = is4_3 ? 0.07f : 0.15f;
+	float x = is4_3 ? 0.07f : 0.13f;
 	float scale = is4_3 ? 1.6f : 1.8f;
 
 	if (!m_UILabel[SLEEPING_MENU_UI_TITLE].Create("snake !", font, textc,

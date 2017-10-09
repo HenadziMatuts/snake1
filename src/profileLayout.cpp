@@ -6,7 +6,6 @@
 struct ProfileEntryButtonData
 {
 	bool *m_isTextInputActive;
-	int m_slot;
 	char *m_input;
 	UIButton *m_this;
 };
@@ -30,7 +29,7 @@ static UILayout* ProfileBackButtonEventHandler(SDL_Event *event, GameScreen **ne
 	return newLayout;
 }
 
-static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
+static UILayout* ProfileCreateButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
 {
 	UILayout *newLayout = nullptr;
 	ProfileEntryButtonData *data = (ProfileEntryButtonData*)userData;
@@ -56,6 +55,8 @@ static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **n
 					
 					*data->m_isTextInputActive = false;
 					SDL_StopTextInput();
+
+					newLayout = &Globals::profileLayout;
 					break;
 
 				case SDLK_BACKSPACE:
@@ -89,21 +90,35 @@ static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **n
 			{
 				case SDLK_RETURN:
 				case SDLK_SPACE:
-					if (!profiles->IsProfileActive(data->m_slot))
+					if (profiles->HasFreeSlot())
 					{
 						SDL_StartTextInput();
 						*data->m_isTextInputActive = true;
 
 						memset(data->m_input, 0, MAX_PROFILE_NAME_SIZE);
-
 						data->m_this->SetText("_", font);
 					}
-					else
-					{
-						profiles->DeleteProfile(data->m_slot);
-					}
 					break;
-				}
+			}
+		}
+	}
+
+	return newLayout;
+}
+
+static UILayout* ProfileDeleteButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
+{
+	UILayout *newLayout = nullptr;
+
+	if (event->type == SDL_KEYUP)
+	{
+		switch (event->key.keysym.sym)
+		{
+			case SDLK_RETURN:
+			case SDLK_SPACE:
+				Game::Instance().Profiles().DeleteCurrentProfile();
+				newLayout = &Globals::profileLayout;
+				break;
 		}
 	}
 
@@ -113,7 +128,7 @@ static UILayout* ProfileEntryButtonEventHandler(SDL_Event *event, GameScreen **n
 void ProfileLayout::Enter()
 {
 	m_UIButton[m_SelectedButton].Select(false);
-	m_SelectedButton = PROFILE_UI_BUTTON_BACK;
+	m_SelectedButton = PROFILE_UI_BUTTON_NEW;
 	m_UIButton[m_SelectedButton].Select(true);
 }
 
@@ -151,7 +166,6 @@ UILayout* ProfileLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 				}
 			default:
 				userData.m_isTextInputActive = &m_IsTextInputActive;
-				userData.m_slot = m_SelectedButton - PROFILE_UI_BUTTON_FIRST_PROFILE;
 				userData.m_input = m_Input;
 				userData.m_this = &m_UIButton[m_SelectedButton];
 
@@ -167,27 +181,30 @@ GameEvent ProfileLayout::Update(uint32_t elapsed)
 {
 	TTF_Font *font = Game::Instance().Resources().GetFont();
 	ProfileManager *profiles = &Game::Instance().Profiles();
-	char *buttonLabel = nullptr;
+	char *profileName = nullptr;
+	char title[64];
 
-	for (int i = PROFILE_UI_BUTTON_FIRST_PROFILE, j = 0; i <= PROFILE_UI_BUTTON_LAST_PROFILE; i++, j++)
+	if (profileName = profiles->GetCurrentProfileName())
 	{
-		if ((j > 0) && !profiles->IsProfileActive(j)
-			&& !profiles->IsProfileActive(j - 1))
-		{
-			m_UIButton[i].SetVisibility(false);
-			m_UIButton[i].Select(false);
-		}
-		else
-		{
-			m_UIButton[i].SetVisibility(true);
-		}
+		sprintf_s(title, "profile : %s", profileName);
+		m_UILabel[PROFILE_UI_LABEL_TITLE].SetText(title, font);
 
-		if (!m_IsTextInputActive)
-		{
-			buttonLabel = profiles->GetProfielName(j);
-			m_UIButton[i].SetText(*buttonLabel ? buttonLabel : "new profile", font);
-		}
+		m_UIButton[PROFILE_UI_BUTTON_CHANGE].SetVisibility(true);
+		m_UIButton[PROFILE_UI_BUTTON_DELETE].SetVisibility(true);
+	}
+	else
+	{
+		m_UILabel[PROFILE_UI_LABEL_TITLE].SetText("profile management", font);
+		m_UIButton[PROFILE_UI_BUTTON_CHANGE].SetVisibility(false);
+		m_UIButton[PROFILE_UI_BUTTON_CHANGE].Select(false);
 
+		m_UIButton[PROFILE_UI_BUTTON_DELETE].SetVisibility(false);
+		m_UIButton[PROFILE_UI_BUTTON_DELETE].Select(false);
+	}
+
+	if (!m_IsTextInputActive)
+	{
+		m_UIButton[PROFILE_UI_BUTTON_NEW].SetText("create", font);
 	}
 
 	if (!m_UIButton[m_SelectedButton].IsVisible())
@@ -196,7 +213,7 @@ GameEvent ProfileLayout::Update(uint32_t elapsed)
 		{
 			m_SelectedButton =
 				(ProfileUIButton)Utilities::ModuloSum(m_SelectedButton,
-					1, PROFILE_UI_BUTTON_TOTAL);
+					-1, PROFILE_UI_BUTTON_TOTAL);
 		} while (!m_UIButton[m_SelectedButton].IsVisible());
 
 
@@ -225,36 +242,22 @@ bool ProfileLayout::CreateLayout(SDL_Renderer *renderer)
 	SDL_Color *textc = &Globals::COLOR_SCHEME->m_Text;
 	SDL_Color *selectorc = &Globals::COLOR_SCHEME->m_ButtonSelector;
 
-	if (!m_UILabel[PROFILE_UI_LABEL_TITLE].Create("profile management", font, textc, renderer, 0.5f, 0.125f, true, 0.75f))
+	if (!m_UILabel[PROFILE_UI_LABEL_TITLE].Create("profile management", 
+		font, textc, renderer, 0.5f, 0.125f, true, 0.75f))
 	{
 		return false;
 	}
 
-	if (!m_UIButton[PROFILE_UI_BUTTON_BACK].Create("back", font, textc, selectorc,
-		renderer, 0.5f, 0.875f, true, ProfileBackButtonEventHandler, 0.55f))
+	if (!m_UIButton[PROFILE_UI_BUTTON_BACK].Create("back to menu", font, textc, selectorc,
+		renderer, 0.5f, 0.875f, true, ProfileBackButtonEventHandler, 0.55f)
+		|| !m_UIButton[PROFILE_UI_BUTTON_CHANGE].Create("switch", font, textc, selectorc,
+			renderer, 0.5f, 0.375f, false, nullptr, 0.45f)
+		|| !m_UIButton[PROFILE_UI_BUTTON_NEW].Create("create", font, textc, selectorc,
+			renderer, 0.5f, 0.5f, true, ProfileCreateButtonEventHandler, 0.45f)
+		|| !m_UIButton[PROFILE_UI_BUTTON_DELETE].Create("delete", font, textc, selectorc,
+			renderer, 0.5f, 0.625f, false, ProfileDeleteButtonEventHandler, 0.45f))
 	{
 		return false;
-	}
-
-	for (int i = PROFILE_UI_BUTTON_FIRST_PROFILE, j = 0; i <= PROFILE_UI_BUTTON_LAST_PROFILE; i++, j++)
-	{
-		char profile[21] = "\0";
-
-		strcpy_s(profile, profiles->IsProfileActive(j) ?
-			profiles->GetProfielName(j) : "new profile");
-
-		bool visible = true;
-		if ((j > 0) && !profiles->IsProfileActive(j)
-			&& !profiles->IsProfileActive(j - 1))
-		{
-			visible = false;
-		}
-
-		if (!m_UIButton[i].Create(profile, font, textc, selectorc, renderer,
-				0.5f, 0.28f + (0.11f * j), visible, ProfileEntryButtonEventHandler, 0.45f))
-		{
-			return false;
-		}
 	}
 
 	m_UIButton[m_SelectedButton].Select(true);

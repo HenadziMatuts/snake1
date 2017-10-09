@@ -69,7 +69,6 @@ GameScreen* MenuScreen::HandleInput(SDL_Event *event)
 void MenuScreen::Update(uint32_t elapsed, EventBus *eventBus)
 {
 	m_Demo.Update(elapsed, eventBus);
-	m_CurrentLayout->Update(elapsed);
 	
 	if (m_Fading)
 	{
@@ -79,11 +78,17 @@ void MenuScreen::Update(uint32_t elapsed, EventBus *eventBus)
 			m_CurrentLayout = m_NewLayout;
 			m_NewLayout = nullptr;
 			m_LayoutSwitched = true;
+
+			m_CurrentLayout->Update(elapsed);
 		}
 		if (m_FadingTimer >= 400)
 		{
 			m_Fading = false;
 		}
+	}
+	else
+	{
+		m_CurrentLayout->Update(elapsed);
 	}
 }
 

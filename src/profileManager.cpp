@@ -95,3 +95,30 @@ char* ProfileManager::GetCurrentProfileName()
 {
 	return m_CurrentProfile ? m_CurrentProfile->m_ProfileName : nullptr;
 }
+
+bool ProfileManager::HasFreeSlot()
+{
+	int slots = TOTAL_PROFILES;
+
+	for (int i = 0; i < TOTAL_PROFILES; i++)
+	{
+		if (m_Profiles[i].m_IsActive)
+		{
+			slots--;
+		}
+	}
+
+	return slots != 0;
+}
+
+void ProfileManager::DeleteCurrentProfile()
+{
+	for (int i = 0; i < TOTAL_PROFILES; i++)
+	{
+		if (m_CurrentProfile == &m_Profiles[i])
+		{
+			DeleteProfile(i);
+			break;
+		}
+	}
+}

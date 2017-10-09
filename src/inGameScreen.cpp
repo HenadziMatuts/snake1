@@ -193,8 +193,6 @@ void InGameScreen::Update(uint32_t elapsed, EventBus *eventBus)
 	m_Field.Update(elapsed, eventBus);
 	m_Scoreboard.Update(elapsed, eventBus);
 
-	m_CurrentLayout->Update(elapsed);
-
 	if (m_Fading)
 	{
 		m_FadingTimer += elapsed;
@@ -209,11 +207,17 @@ void InGameScreen::Update(uint32_t elapsed, EventBus *eventBus)
 			m_CurrentLayout = m_NewLayout;
 			m_NewLayout = nullptr;
 			m_LayoutSwitched = true;
+
+			m_CurrentLayout->Update(elapsed);
 		}
 		if (m_FadingTimer >= 400)
 		{
 			m_Fading = false;
 		}
+	}
+	else
+	{
+		m_CurrentLayout->Update(elapsed);
 	}
 }
 
