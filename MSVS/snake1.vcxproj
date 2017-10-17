@@ -33,6 +33,7 @@
     <ClCompile Include="..\src\newGameLayout.cpp" />
     <ClCompile Include="..\src\profileLayout.cpp" />
     <ClCompile Include="..\src\profileManager.cpp" />
+    <ClCompile Include="..\src\profileSwitchingSubLayout.cpp" />
     <ClCompile Include="..\src\resourceManager.cpp" />
     <ClCompile Include="..\src\settingsLayout.cpp" />
     <ClCompile Include="..\src\sleepingMenuLayout.cpp" />
@@ -55,6 +56,7 @@
     <ClInclude Include="..\src\newGameLayout.h" />
     <ClInclude Include="..\src\profileLayout.h" />
     <ClInclude Include="..\src\profileManager.h" />
+    <ClInclude Include="..\src\profileSwitchingSubLayout.h" />
     <ClInclude Include="..\src\settingsLayout.h" />
     <ClInclude Include="..\src\sleepingMenuLayout.h" />
     <ClInclude Include="..\src\uiWidget.h" />

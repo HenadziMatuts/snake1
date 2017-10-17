@@ -308,3 +308,8 @@ bool UIButton::IsSelected()
 {
 	return m_IsSelected;
 }
+
+char* UIButton::GetText()
+{
+	return m_Text;
+}

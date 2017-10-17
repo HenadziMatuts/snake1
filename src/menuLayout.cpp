@@ -27,7 +27,6 @@ static UILayout* MenuResumeButtonEventHandler(SDL_Event *event, GameScreen **new
 static UILayout* MenuNewGameButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
 {
 	UILayout *newLayout = nullptr;
-	MenuButtonEvenHandlersData *data = (MenuButtonEvenHandlersData*)userData;
 
 	if (event->type == SDL_KEYUP)
 	{
