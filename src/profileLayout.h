@@ -21,9 +21,7 @@ enum ProfileUIButton {
 class ProfileLayout : public UILayout {
 public:
 	ProfileLayout() :
-		m_IsTextInputActive(false),
-		m_SubLayout(nullptr),
-		m_CloseSubLayout(false)
+		m_IsTextInputActive(false)
 	{};
 
 	void Enter();
@@ -43,7 +41,4 @@ private:
 
 	bool m_IsTextInputActive;
 	char m_Input[MAX_PROFILE_NAME_SIZE];
-
-	UILayout *m_SubLayout;
-	bool m_CloseSubLayout;
 };

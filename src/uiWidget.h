@@ -89,8 +89,6 @@ public:
 	void Select(bool isSelected);
 	bool IsSelected();
 
-	char* GetText();
-
 private:
 	Texture m_Texture;
 

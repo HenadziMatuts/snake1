@@ -2,13 +2,9 @@
 #include "game.h"
 #include "utilities.h"
 #include "globals.h"
-#include "profileSwitchingSubLayout.h"
-
-static ProfileSwitchingSubLayout profileSwitchingSubLayout;
 
 struct ProfileEntryButtonData
 {
-	UILayout *m_sublayout;
 	bool *m_isTextInputActive;
 	char *m_input;
 	UIButton *m_this;
@@ -132,8 +128,6 @@ static UILayout* ProfileDeleteButtonEventHandler(SDL_Event *event, GameScreen **
 static UILayout* ProfileSwitchButtonEventHandler(SDL_Event *event, GameScreen **newScreen, void *userData)
 {
 	UILayout *newLayout = nullptr;
-	ProfileEntryButtonData *data = (ProfileEntryButtonData*)userData;
-	ProfileManager *profiles = &Game::Instance().Profiles();
 
 	if (event->type == SDL_KEYUP)
 	{
@@ -141,17 +135,8 @@ static UILayout* ProfileSwitchButtonEventHandler(SDL_Event *event, GameScreen **
 		{
 			case SDLK_RETURN:
 			case SDLK_SPACE:
-				if (profiles->OccupiedSlots() <= 2)
-				{
-					Game::Instance().Profiles().NextProfile();
-					newLayout = &Globals::profileLayout;
-				}
-				else
-				{
-					profileSwitchingSubLayout.Enter();
-					data->m_sublayout = &profileSwitchingSubLayout;
-				}
-
+				Game::Instance().Profiles().NextProfile();
+				newLayout = &Globals::profileLayout;
 				break;
 		}
 	}
@@ -164,23 +149,13 @@ void ProfileLayout::Enter()
 	m_UIButton[m_SelectedButton].Select(false);
 	m_SelectedButton = PROFILE_UI_BUTTON_NEW;
 	m_UIButton[m_SelectedButton].Select(true);
-
-	m_SubLayout = nullptr;
 }
 
 UILayout* ProfileLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 {
 	UILayout *newLayout = nullptr;
 
-	if (m_SubLayout)
-	{
-		newLayout = m_SubLayout->HandleInput(event, newScreen);
-		if (newLayout)
-		{
-			m_CloseSubLayout = true;
-		}
-	}
-	else if (event->type == SDL_KEYUP || event->type == SDL_TEXTINPUT)
+	if (event->type == SDL_KEYUP || event->type == SDL_TEXTINPUT)
 	{
 		ProfileEntryButtonData userData;
 
@@ -212,15 +187,8 @@ UILayout* ProfileLayout::HandleInput(SDL_Event *event, GameScreen **newScreen)
 				userData.m_isTextInputActive = &m_IsTextInputActive;
 				userData.m_input = m_Input;
 				userData.m_this = &m_UIButton[m_SelectedButton];
-				userData.m_sublayout = nullptr;
 
 				newLayout = m_UIButton[m_SelectedButton].HandleInput(event, newScreen, &userData);
-
-				if (userData.m_sublayout)
-				{
-					m_SubLayout = userData.m_sublayout;
-				}
-
 				break;
 		}
 	}
@@ -271,23 +239,11 @@ GameEvent ProfileLayout::Update(uint32_t elapsed)
 		m_UIButton[m_SelectedButton].Select(true);
 	}
 
-	if (m_CloseSubLayout)
-	{
-		m_SubLayout = nullptr;
-		m_CloseSubLayout = false;
-	}
-
-	if (m_SubLayout)
-	{
-		m_SubLayout->Update(elapsed);
-	}
-
 	return GAME_EVENT_NOTHING_HAPPENS;
 }
 
 void ProfileLayout::Render(SDL_Renderer *renderer)
 {
-	
 	for (int i = 0; i < PROFILE_UI_LABEL_TOTAL; i++)
 	{
 		m_UILabel[i].Render(renderer);
@@ -295,11 +251,6 @@ void ProfileLayout::Render(SDL_Renderer *renderer)
 	for (int i = 0; i < PROFILE_UI_BUTTON_TOTAL; i++)
 	{
 		m_UIButton[i].Render(renderer);
-	}
-
-	if (m_SubLayout)
-	{
-		m_SubLayout->Render(renderer);
 	}
 }
 
@@ -331,12 +282,9 @@ bool ProfileLayout::CreateLayout(SDL_Renderer *renderer)
 	m_UIButton[m_SelectedButton].Select(true);
 	m_IsTextInputActive = false;
 
-	profileSwitchingSubLayout.CreateLayout(renderer);
-
 	return true;
 }
 
 void ProfileLayout::DestroyLayout()
 {
-	profileSwitchingSubLayout.DestroyLayout();
 }

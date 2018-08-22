@@ -5,49 +5,96 @@
 ProfileManager::ProfileManager()
 {
 	m_CurrentProfile = nullptr;
-	m_Profiles.reserve(sizeof(UserProfile) * TOTAL_PROFILES);
+
+	for (int i = 0; i < TOTAL_PROFILES; i++)
+	{
+		m_Profiles[i].m_IsActive = false;
+		memset(m_Profiles[i].m_ProfileName, 0, MAX_PROFILE_NAME_SIZE);
+	}
 }
 
 void ProfileManager::CreateProfile(char *profileName)
 {
-	if(m_Profiles.size() >= TOTAL_PROFILES)
+	for (int i = 0; i < TOTAL_PROFILES; i++)
 	{
-		LOG_INFO("There are no free slots left.");
+		if (!m_Profiles[i].m_IsActive)
+		{
+			m_Profiles[i].m_IsActive = true;
+			strcpy_s(m_Profiles[i].m_ProfileName, profileName);
+
+			m_CurrentProfile = &m_Profiles[i];
+			return;
+		}
 	}
 
-	UserProfile newProfile;
-	strcpy_s(newProfile.m_ProfileName, profileName);
-
-	m_Profiles.push_back(newProfile);
-
-	m_CurrentProfile = &m_Profiles.back();
+	LOG_INFO("There are no free slots left.");
 }
 
 void ProfileManager::DeleteProfile(int slot)
 {
-	if (slot < 0 || slot >= (int)m_Profiles.size())
+	if (slot < 0 || slot > TOTAL_PROFILES)
 	{
 		return;
 	}
 
+	m_Profiles[slot].m_IsActive = false;
+	memset(m_Profiles[slot].m_ProfileName, 0, MAX_PROFILE_NAME_SIZE);
 	if (m_CurrentProfile == &m_Profiles[slot])
 	{
 		m_CurrentProfile = nullptr;
 	}
 
-	m_Profiles.erase(m_Profiles.begin() + slot);
-
-	if (!m_CurrentProfile && m_Profiles.size())
+	for (int i = 0; i < TOTAL_PROFILES - 1; i++)
 	{
-		m_CurrentProfile = (slot >= (int)m_Profiles.size()) ?
-			&m_Profiles.back() : &m_Profiles[slot];
+		if (m_Profiles[i].m_IsActive)
+		{
+			if (!m_CurrentProfile)
+			{
+				m_CurrentProfile = &m_Profiles[i];
+			}
+
+			continue;
+		}
+
+		for (int j = i + 1; j < TOTAL_PROFILES; j++)
+		{
+			if (!m_Profiles[j].m_IsActive)
+			{
+				continue;
+			}
+			
+			UserProfile swap = m_Profiles[j];
+			m_Profiles[j] = m_Profiles[i];
+			m_Profiles[i] = swap;
+
+			if (!m_CurrentProfile)
+			{
+				m_CurrentProfile = &m_Profiles[i];
+			}
+
+			break;
+		}
 	}
 }
 
-char* ProfileManager::GetProfileName(int slot)
+bool ProfileManager::IsProfileActive(int slot)
 {
-	return (slot < 0 || slot >= (int)m_Profiles.size()) ? nullptr :
-		m_Profiles[slot].m_ProfileName;
+	if (slot < 0 || slot > TOTAL_PROFILES)
+	{
+		return false;
+	}
+
+	return m_Profiles[slot].m_IsActive;
+}
+
+char* ProfileManager::GetProfielName(int slot)
+{
+	if (slot < 0 || slot > TOTAL_PROFILES)
+	{
+		return nullptr;
+	}
+
+	return m_Profiles[slot].m_ProfileName;
 }
 
 char* ProfileManager::GetCurrentProfileName()
@@ -57,12 +104,22 @@ char* ProfileManager::GetCurrentProfileName()
 
 bool ProfileManager::HasFreeSlot()
 {
-	return (TOTAL_PROFILES - m_Profiles.size()) != 0;
+	int slots = TOTAL_PROFILES;
+
+	for (int i = 0; i < TOTAL_PROFILES; i++)
+	{
+		if (m_Profiles[i].m_IsActive)
+		{
+			slots--;
+		}
+	}
+
+	return slots != 0;
 }
 
 void ProfileManager::DeleteCurrentProfile()
 {
-	for (size_t i = 0; i < m_Profiles.size(); i++)
+	for (int i = 0; i < TOTAL_PROFILES; i++)
 	{
 		if (m_CurrentProfile == &m_Profiles[i])
 		{
@@ -74,53 +131,22 @@ void ProfileManager::DeleteCurrentProfile()
 
 void ProfileManager::NextProfile()
 {
-	size_t s = m_Profiles.size();
-
-	for (size_t i = 0; i < s; i++)
+	for (int i = 0; i < TOTAL_PROFILES; i++)
 	{
 		if (m_CurrentProfile == &m_Profiles[i])
 		{
-			uint32_t next = Utilities::ModuloSum(i, 1, s);
-			m_CurrentProfile = &m_Profiles[next];
+			uint32_t j = Utilities::ModuloSum(i, 1, TOTAL_PROFILES);
 
-			break;
-		}
-	}
-}
-
-void ProfileManager::SwitchProfile(char *profileName)
-{
-	for (size_t i = 0; i < m_Profiles.size(); i++)
-	{
-		if (!strcmp(m_Profiles[i].m_ProfileName, profileName))
-		{
-			m_CurrentProfile = &m_Profiles[i];
-			break;
-		}
-	}
-}
-
-int ProfileManager::OccupiedSlots()
-{
-	return m_Profiles.size();
-}
-
-int ProfileManager::CurrentProfileSlot()
-{
-	if (!m_CurrentProfile)
-	{
-		return -1;
-	}
-	else
-	{
-		for (size_t i = 0; i < m_Profiles.size(); i++)
-		{
-			if (m_CurrentProfile == &m_Profiles[i])
+			if (m_Profiles[j].m_IsActive)
 			{
-				return i;
+				m_CurrentProfile = &m_Profiles[j];
 			}
+			else
+			{
+				m_CurrentProfile = &m_Profiles[0];
+			}
+
+			break;
 		}
 	}
-
-	return -1;
 }
